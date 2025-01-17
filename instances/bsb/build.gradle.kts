@@ -2,6 +2,7 @@ import com.flipperdevices.buildlogic.ApkConfig.VERSION_NAME
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
@@ -43,6 +44,7 @@ kotlin {
 
     jvm("desktop")
 
+    val xcFramework = XCFramework()
     listOf(
         iosX64(),
         iosArm64(),
@@ -52,9 +54,12 @@ kotlin {
             baseName = "ComposeApp"
             isStatic = true
 
+            xcFramework.add(this)
+
             export(libs.decompose)
             export(libs.essenty.lifecycle)
             export(libs.settings)
+            export(projects.components.bsb.appblocker.api)
         }
     }
 
@@ -96,6 +101,7 @@ kotlin {
             api(libs.essenty.lifecycle)
             api(libs.settings)
 
+            api(projects.components.bsb.appblocker.api)
             implementation(libs.settings.observable)
         }
         wasmJsMain.dependencies {
