@@ -18,10 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,18 +28,39 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import busystatusbar.components.core.ui.res_preview.generated.resources.Res
+import busystatusbar.components.core.ui.res_preview.generated.resources.ic_preview_pomodoro
 import com.flipperdevices.bsb.core.theme.BusyBarThemeInternal
 import com.flipperdevices.bsb.core.theme.LocalPallet
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Suppress("MagicNumber")
 private val DASH_INTERVALS = floatArrayOf(10f, 10f)
+
+fun Modifier.dashedBorder(
+    color: Color,
+    radius: Dp
+): Modifier {
+    return this.then(
+        Modifier.drawBehind {
+            drawRoundRect(
+                color = color,
+                style = Stroke(
+                    width = 6f,
+                    pathEffect = PathEffect.dashPathEffect(intervals = DASH_INTERVALS, phase = 0f)
+                ),
+                cornerRadius = CornerRadius(radius.toPx())
+            )
+        }
+    )
+}
 
 @Composable
 fun BChipButton(
@@ -64,16 +81,7 @@ fun BChipButton(
                 if (dashedBorderColor == null) {
                     Modifier
                 } else {
-                    Modifier.drawBehind {
-                        drawRoundRect(
-                            color = dashedBorderColor,
-                            style = Stroke(
-                                width = 6f,
-                                pathEffect = PathEffect.dashPathEffect(intervals = DASH_INTERVALS, phase = 0f)
-                            ),
-                            cornerRadius = CornerRadius(112.dp.toPx())
-                        )
-                    }
+                    Modifier.dashedBorder(dashedBorderColor, 112.dp)
                 }
             )
             .animateContentSize()
@@ -174,7 +182,7 @@ private fun BChipButtonPreview() {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     BChipButton(
                         text = "Hello",
-                        painter = rememberVectorPainter(Icons.Filled.Call),
+                        painter = painterResource(Res.drawable.ic_preview_pomodoro),
                         onClick = {}
                     )
                     BChipButton(
@@ -184,12 +192,12 @@ private fun BChipButtonPreview() {
                     )
                     BChipButton(
                         text = null,
-                        painter = rememberVectorPainter(Icons.Filled.Call),
+                        painter = painterResource(Res.drawable.ic_preview_pomodoro),
                         onClick = {}
                     )
                     BChipButton(
                         text = "New tag",
-                        painter = rememberVectorPainter(Icons.Filled.Add),
+                        painter = painterResource(Res.drawable.ic_preview_pomodoro),
                         onClick = {},
                         background = Color.Transparent,
                         contentColor = LocalPallet.current.transparent.whiteInvert.primary.copy(alpha = 0.5f),
@@ -201,13 +209,13 @@ private fun BChipButtonPreview() {
                             chip = {
                                 BChipButton(
                                     text = "My Tag",
-                                    painter = rememberVectorPainter(Icons.Filled.Call),
+                                    painter = painterResource(Res.drawable.ic_preview_pomodoro),
                                     onClick = {}
                                 )
                             },
                             notification = {
                                 Icon(
-                                    painter = rememberVectorPainter(Icons.Filled.Delete),
+                                    painter = painterResource(Res.drawable.ic_preview_pomodoro),
                                     contentDescription = null,
                                     tint = Color.Black,
                                     modifier = Modifier.size(24.dp)

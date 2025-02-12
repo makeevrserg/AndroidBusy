@@ -47,6 +47,8 @@ include(
     ":components:core:ui:picker",
     ":components:core:ui:option",
     ":components:core:ui:timeline",
+    ":components:core:ui:card-frame",
+    ":components:core:ui:res-preview",
 
     ":components:bsb:core:theme",
     ":components:bsb:core:res",

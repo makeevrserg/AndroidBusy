@@ -17,8 +17,7 @@ package com.flipperdevices.ui.timeline
  * @return A `Float` value representing the calculated transparency level for the line.
  *
  */
-// todo this code still WIP
-@Suppress("LongMethod", "LongParameterList")
+@Suppress("LongParameterList")
 internal fun calculateLineTransparency(
     lineIndex: Int,
     totalLines: Int,
@@ -28,6 +27,7 @@ internal fun calculateLineTransparency(
     fadeOutLinesCount: Int,
     maxFadeTransparency: Float
 ): Float {
+    if (fadeOutLinesCount <= 0) return 1f
     val actualCount = fadeOutLinesCount + 1
     val transparencyStep = maxFadeTransparency / actualCount
 

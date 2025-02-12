@@ -17,11 +17,71 @@ class TimerSetupViewModel(
         sharingStarted = SharingStarted.Eagerly
     )
 
-    fun setTimer(duration: Duration) {
+    fun toggleWorkAutoStart() {
         viewModelScope.launch {
             krateApi.timerSettingsKrate.update { timerSettings ->
                 timerSettings.copy(
-                    timer = duration
+                    intervalsSettings = timerSettings.intervalsSettings.copy(
+                        autoStartWork = !timerSettings.intervalsSettings.autoStartWork
+                    )
+                )
+            }
+        }
+    }
+
+    fun toggleRestAutoStart() {
+        viewModelScope.launch {
+            krateApi.timerSettingsKrate.update { timerSettings ->
+                timerSettings.copy(
+                    intervalsSettings = timerSettings.intervalsSettings.copy(
+                        autoStartRest = !timerSettings.intervalsSettings.autoStartRest
+                    )
+                )
+            }
+        }
+    }
+
+    fun toggleSoundBeforeWorkStarts() {
+        viewModelScope.launch {
+            krateApi.timerSettingsKrate.update { timerSettings ->
+                timerSettings.copy(
+                    soundSettings = timerSettings.soundSettings.copy(
+                        alertBeforeWorkStarts = !timerSettings.soundSettings.alertBeforeWorkStarts
+                    )
+                )
+            }
+        }
+    }
+
+    fun toggleSoundBeforeWorkEnds() {
+        viewModelScope.launch {
+            krateApi.timerSettingsKrate.update { timerSettings ->
+                timerSettings.copy(
+                    soundSettings = timerSettings.soundSettings.copy(
+                        alertBeforeWorkEnds = !timerSettings.soundSettings.alertBeforeWorkEnds
+                    )
+                )
+            }
+        }
+    }
+
+    fun toggleIntervals() {
+        viewModelScope.launch {
+            krateApi.timerSettingsKrate.update { timerSettings ->
+                timerSettings.copy(
+                    intervalsSettings = timerSettings.intervalsSettings.copy(
+                        isEnabled = !timerSettings.intervalsSettings.isEnabled
+                    )
+                )
+            }
+        }
+    }
+
+    fun setTotalTime(duration: Duration) {
+        viewModelScope.launch {
+            krateApi.timerSettingsKrate.update { timerSettings ->
+                timerSettings.copy(
+                    totalTime = duration
                 )
             }
         }
@@ -39,24 +99,24 @@ class TimerSetupViewModel(
         }
     }
 
-    fun setLongRest(duration: Duration) {
+    fun setWork(duration: Duration) {
         viewModelScope.launch {
             krateApi.timerSettingsKrate.update { timerSettings ->
                 timerSettings.copy(
                     intervalsSettings = timerSettings.intervalsSettings.copy(
-                        longRest = duration
+                        work = duration
                     )
                 )
             }
         }
     }
 
-    fun setCycles(value: Int) {
+    fun setLongRest(duration: Duration) {
         viewModelScope.launch {
             krateApi.timerSettingsKrate.update { timerSettings ->
                 timerSettings.copy(
                     intervalsSettings = timerSettings.intervalsSettings.copy(
-                        cycles = value
+                        longRest = duration
                     )
                 )
             }

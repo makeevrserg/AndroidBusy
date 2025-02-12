@@ -11,7 +11,11 @@ abstract class IntervalsSetupSheetDecomposeComponent(
 
     abstract fun showLongRest()
 
-    abstract fun showCycles()
+    abstract fun showWork()
+
+    abstract fun showSound()
+
+    abstract fun showBlockedApps()
 
     fun interface Factory {
         operator fun invoke(

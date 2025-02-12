@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -22,9 +23,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.flipperdevices.bsb.core.theme.LocalBusyBarFonts
 import com.flipperdevices.bsb.core.theme.LocalPallet
 import kotlin.math.sqrt
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration
 
 /**
  * A composable function that renders a single vertical line in the `WheelPicker`.
@@ -43,13 +45,15 @@ internal fun VerticalLine(
     index: Int,
     isSelected: Boolean,
     lineTransparency: Float,
+    unitConverter: (Int) -> Duration,
     style: LineStyle,
     progression: IntProgression
 ) {
+    val isVisible = index >= progression.first && index <= progression.last
     val paddingBottom by animateDpAsState(
         targetValue = when {
-            isSelected -> sqrt(style.selectedLineHeight.value).dp
-            index % progression.step == 0 -> -style.stepLineHeight.value.dp / 4
+            isSelected -> sqrt(style.selectedLineHeight.value).dp / 2
+            index % progression.step == 0 -> -sqrt(style.stepLineHeight.value).dp * 2
             else -> -sqrt(style.normalLineHeight.value).dp
         },
         animationSpec = tween(400)
@@ -63,16 +67,19 @@ internal fun VerticalLine(
         tween(600)
     )
     val textMeasurer = rememberTextMeasurer()
-    val fontSizeFloat by animateFloatAsState(
+
+    val fontSize by animateTextUnitAsState(
         targetValue = when {
-            isSelected && index == 0 -> 50f
-            isSelected -> 40f
-            else -> 15f
+            isSelected && index == 0 -> style.selectedZeroFontSize
+            isSelected -> style.selectedFontSize
+            else -> style.unselectedFontSize
         },
         animationSpec = tween()
     )
     val fontColor by animateColorAsState(
         targetValue = when {
+            !isVisible -> Color.Transparent
+
             isSelected ->
                 LocalPallet.current
                     .white
@@ -94,13 +101,15 @@ internal fun VerticalLine(
             }.coerceAtMost(fontColor.alpha)
         )
     )
-    val result = remember(isSelected, textColor, fontSizeFloat, fontColor, index) {
+    val fontFamily = LocalBusyBarFonts.current.pragmatica
+    val result = remember(isSelected, textColor, fontSize, fontColor, index) {
         textMeasurer.measure(
-            text = index.seconds.toFormattedTime(),
+            text = unitConverter.invoke(index).toFormattedTime(),
             style = TextStyle(
-                fontSize = fontSizeFloat.sp,
+                fontSize = fontSize,
                 color = textColor,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                fontFamily = fontFamily
             ),
             overflow = TextOverflow.Clip
         )
@@ -108,13 +117,17 @@ internal fun VerticalLine(
 
     val textYOffset by animateFloatAsState(
         if (isSelected) {
-            -result.size.height.div(2).toFloat()
+            -result.size.height.div(4).toFloat()
         } else {
-            result.size.height.div(2).toFloat()
+            result.size.height.times(1.3).toFloat()
         }
     )
     val color by animateColorAsState(
-        if (isSelected) style.selectedLineColor else style.unselectedLineColor,
+        when {
+            !isVisible -> Color.Transparent
+            isSelected -> style.selectedLineColor
+            else -> style.unselectedLineColor
+        },
         tween(600)
     )
     val width by animateDpAsState(
@@ -148,7 +161,8 @@ internal fun VerticalLine(
                 y = with(localDensity) { 50.sp.toPx() }
                     .plus(with(localDensity) { paddingBottom.toPx() })
             ),
-            color = color.copy(alpha = lineTransparency.coerceAtMost(color.alpha)),
+            color = color
+                .copy(alpha = lineTransparency.coerceAtMost(color.alpha)),
             size = Size(
                 width = with(localDensity) { width.toPx() },
                 height = with(localDensity) { lineHeight.toPx() }
