@@ -6,7 +6,7 @@ plugins {
 }
 
 commonDependencies {
-    implementation(projects.components.bsb.timer.main.api)
+    implementation(projects.components.bsb.timer.cards.api)
 
     implementation(projects.components.core.di)
     implementation(projects.components.core.log)
@@ -18,15 +18,13 @@ commonDependencies {
     implementation(projects.components.core.ui.sheet)
     implementation(projects.components.core.ui.picker)
     implementation(projects.components.core.ui.lifecycle)
+    implementation(projects.components.core.ui.timeline)
 
     implementation(projects.components.bsb.root.api)
     implementation(projects.components.bsb.preference.api)
-    implementation(projects.components.bsb.timer.setup.api)
-    implementation(projects.components.bsb.timer.finish.api)
-    implementation(projects.components.bsb.timer.active.api)
     implementation(projects.components.bsb.timer.common)
+    implementation(projects.components.bsb.timer.setup.api)
     implementation(projects.components.bsb.timer.background.api)
-    implementation(projects.components.bsb.timer.cards.api)
 
     implementation(libs.decompose)
     implementation(libs.decompose.composeExtension)
