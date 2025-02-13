@@ -4,9 +4,8 @@ import com.flipperdevices.bsb.cloud.model.BSBEmailVerificationResponse
 import com.flipperdevices.bsb.cloud.model.BSBEmailVerificationType
 import com.flipperdevices.bsb.cloud.model.BSBOAuthInformation
 import com.flipperdevices.bsb.cloud.model.BSBOAuthWebProvider
-import com.flipperdevices.bsb.cloud.model.BSBUser
 
-interface BSBAuthApi {
+interface BSBAuthApi : BSBUserApi {
     suspend fun isUserExist(email: String): Result<Boolean>
 
     suspend fun signIn(
@@ -20,9 +19,9 @@ interface BSBAuthApi {
         codeVerification: String
     ): Result<Unit>
 
-    suspend fun jwtAuth(token: String): Result<Unit>
+    suspend fun signIn(token: String): Result<Unit>
 
-    suspend fun getUser(): Result<BSBUser>
+    suspend fun jwtAuth(token: String): Result<Unit>
 
     suspend fun requestVerifyEmail(
         email: String,
@@ -47,5 +46,8 @@ interface BSBAuthApi {
         password: String
     ): Result<Unit>
 
-    fun getUrlForOauth(oAuthProvider: BSBOAuthWebProvider, codeChallenge: String): BSBOAuthInformation
+    fun getUrlForOauth(
+        oAuthProvider: BSBOAuthWebProvider,
+        codeChallenge: String
+    ): BSBOAuthInformation
 }

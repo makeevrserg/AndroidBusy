@@ -12,7 +12,8 @@ abstract class AuthDecomposeComponent<T : Any> : CompositeDecomposeComponent<T>(
         operator fun invoke(
             componentContext: ComponentContext,
             onBackParameter: DecomposeOnBackParameter,
-            deeplink: Deeplink.Root.Auth?
+            deeplink: Deeplink.Root.Auth?,
+            onComplete: () -> Unit
         ): AuthDecomposeComponent<*>
     }
 }
