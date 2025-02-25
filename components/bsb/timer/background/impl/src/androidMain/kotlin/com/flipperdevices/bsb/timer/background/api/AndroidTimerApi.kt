@@ -6,13 +6,10 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import com.flipperdevices.bsb.timer.background.model.ControlledTimerState
-import com.flipperdevices.bsb.timer.background.model.TimerAction
-import com.flipperdevices.bsb.timer.background.service.EXTRA_KEY_TIMER_ACTION
 import com.flipperdevices.bsb.timer.background.service.EXTRA_KEY_TIMER_STATE
 import com.flipperdevices.bsb.timer.background.service.TimerForegroundService
 import com.flipperdevices.bsb.timer.background.service.TimerServiceActionEnum
 import com.flipperdevices.bsb.timer.background.service.TimerServiceBinder
-import com.flipperdevices.core.data.timer.TimerState
 import com.flipperdevices.core.di.AppGraph
 import com.flipperdevices.core.ktx.common.withLock
 import com.flipperdevices.core.log.LogTagProvider
@@ -22,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -42,15 +40,22 @@ class AndroidTimerApi(
 ) : TimerApi, ServiceConnection, LogTagProvider {
     override val TAG = "AndroidTimerApi"
 
-    private val state = MutableStateFlow<ControlledTimerState?>(null)
+    private val timerStateFlow = MutableStateFlow<ControlledTimerState>(ControlledTimerState.NotStarted)
+    private val timerTimestampFlow = MutableStateFlow<TimerTimestamp?>(null)
+
     private val mutex = Mutex()
     private var binderListenerJob: Job? = null
 
-    override fun startTimer(initialTimerState: TimerState) {
+    override fun setTimestampState(state: TimerTimestamp?) {
         info { "Request start timer via android service timer api" }
+        if (state == null) {
+            stopTimer()
+            return
+        }
         val intent = Intent(context, TimerForegroundService::class.java)
         intent.setAction(TimerServiceActionEnum.START.actionId)
-        intent.putExtra(EXTRA_KEY_TIMER_STATE, Json.encodeToString(initialTimerState))
+        runBlocking { timerTimestampFlow.emit(state) }
+        intent.putExtra(EXTRA_KEY_TIMER_STATE, Json.encodeToString(state))
         context.startService(intent)
         runBlocking {
             withLock(mutex) {
@@ -66,20 +71,18 @@ class AndroidTimerApi(
         }
     }
 
-    override fun getState() = state.asStateFlow()
-
-    override fun onAction(action: TimerAction) {
-        val intent = Intent(context, TimerForegroundService::class.java)
-        intent.setAction(TimerServiceActionEnum.ACTION.actionId)
-        intent.putExtra(EXTRA_KEY_TIMER_ACTION, action.ordinal)
-        context.startService(intent)
-    }
-
-    override fun stopTimer() {
+    private fun stopTimer() {
+        timerTimestampFlow.value = null
         val intent = Intent(context, TimerForegroundService::class.java)
         intent.setAction(TimerServiceActionEnum.STOP.actionId)
         context.startService(intent)
     }
+
+    override fun getTimestampState(): StateFlow<TimerTimestamp?> {
+        return timerTimestampFlow.asStateFlow()
+    }
+
+    override fun getState() = timerStateFlow.asStateFlow()
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val timerBinder = service as? TimerServiceBinder
@@ -99,7 +102,7 @@ class AndroidTimerApi(
             withLock(mutex) {
                 binderListenerJob?.cancelAndJoin()
                 binderListenerJob = null
-                state.emit(null)
+                timerStateFlow.emit(ControlledTimerState.Finished)
             }
         }
     }
@@ -107,7 +110,6 @@ class AndroidTimerApi(
     private fun getJob(binder: TimerServiceBinder) = binder
         .timerApi
         .getState()
-        .onEach {
-            state.emit(it)
-        }.launchIn(scope)
+        .onEach { state -> timerStateFlow.emit(state) }
+        .launchIn(scope)
 }

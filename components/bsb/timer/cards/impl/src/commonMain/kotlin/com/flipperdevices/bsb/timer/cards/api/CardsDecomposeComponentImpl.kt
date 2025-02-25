@@ -21,7 +21,8 @@ import com.flipperdevices.bsb.appblocker.filter.api.AppBlockerFilterApi
 import com.flipperdevices.bsb.appblocker.filter.api.model.BlockedAppCount
 import com.flipperdevices.bsb.preference.api.KrateApi
 import com.flipperdevices.bsb.preference.api.ThemeStatusBarIconStyleProvider
-import com.flipperdevices.bsb.timer.background.api.TimerService
+import com.flipperdevices.bsb.timer.background.api.TimerApi
+import com.flipperdevices.bsb.timer.background.util.startWith
 import com.flipperdevices.bsb.timer.cards.composable.BusyCardComposable
 import com.flipperdevices.bsb.timer.common.composable.appbar.ButtonTimerComposable
 import com.flipperdevices.bsb.timer.common.composable.appbar.ButtonTimerState
@@ -37,7 +38,7 @@ import software.amazon.lastmile.kotlin.inject.anvil.ContributesBinding
 @Inject
 class CardsDecomposeComponentImpl(
     @Assisted componentContext: ComponentContext,
-    private val timerService: TimerService,
+    private val timerApi: TimerApi,
     private val krateApi: KrateApi,
     private val appBlockerFilterApi: AppBlockerFilterApi,
     timerSetupSheetDecomposeComponentFactory: TimerSetupSheetDecomposeComponent.Factory,
@@ -80,7 +81,8 @@ class CardsDecomposeComponentImpl(
                     state = ButtonTimerState.START,
                     onClick = {
                         coroutineScope.launch {
-                            timerService.startWith(krateApi.timerSettingsKrate.flow.first())
+                            val settings = krateApi.timerSettingsKrate.flow.first()
+                            timerApi.startWith(settings)
                         }
                     }
                 )

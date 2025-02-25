@@ -4,9 +4,6 @@ import com.flipperdevices.bsb.metronome.api.MetronomeApi
 import com.flipperdevices.bsb.timer.background.api.delegates.CompositeTimerStateListener
 import com.flipperdevices.bsb.timer.background.api.delegates.TimerLoopJob
 import com.flipperdevices.bsb.timer.background.model.ControlledTimerState
-import com.flipperdevices.bsb.timer.background.model.TimerAction
-import com.flipperdevices.bsb.timer.background.model.toPublicState
-import com.flipperdevices.core.data.timer.TimerState
 import com.flipperdevices.core.di.AppGraph
 import com.flipperdevices.core.ktx.common.withLock
 import com.flipperdevices.core.log.LogTagProvider
@@ -15,13 +12,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import me.tatarka.inject.annotations.Inject
 import software.amazon.lastmile.kotlin.inject.anvil.SingleIn
 
@@ -35,7 +32,8 @@ class CommonTimerApi(
     override val TAG = "CommonTimerApi"
 
     private val mutex = Mutex()
-    private val state = MutableStateFlow<ControlledTimerState?>(null)
+    private val timerStateFlow = MutableStateFlow<ControlledTimerState>(ControlledTimerState.NotStarted)
+    private val timerTimestampFlow = MutableStateFlow<TimerTimestamp?>(null)
 
     private var timerJob: TimerLoopJob? = null
     private var stateInvalidateJob: Job? = null
@@ -48,51 +46,55 @@ class CommonTimerApi(
         compositeListeners.removeListener(listener)
     }
 
-    override fun startTimer(initialTimerState: TimerState) {
+    override fun setTimestampState(state: TimerTimestamp?) {
         scope.launch {
+            if (state == null) {
+                stopSelf()
+                return@launch
+            }
             withLock(mutex, "start") {
                 stateInvalidateJob?.cancelAndJoin()
                 timerJob?.cancelAndJoin()
-                val timer = TimerLoopJob(scope, Clock.System.now(), initialTimerState)
+                timerTimestampFlow.emit(state)
+                val timer = TimerLoopJob(scope, state)
                 timerJob = timer
                 compositeListeners.onTimerStart()
                 stateInvalidateJob = timer.getInternalState()
                     .onEach { internalState ->
-                        if (internalState.timerState.minute <= 0 && internalState.timerState.second <= 0) {
-                            stopSelf()
-                        } else {
-                            state.emit(internalState.toPublicState())
-                            metronomeApi.play()
+                        timerStateFlow.emit(internalState)
+                        when (internalState) {
+                            ControlledTimerState.NotStarted -> {
+                                stopSelf()
+                            }
+
+                            ControlledTimerState.Finished -> Unit
+
+                            is ControlledTimerState.Running -> {
+                                if (!internalState.isOnPause) {
+                                    metronomeApi.play()
+                                }
+                            }
                         }
                     }.launchIn(scope)
             }
         }
     }
 
-    override fun getState() = state.asStateFlow()
-
-    override fun onAction(action: TimerAction) {
-        scope.launch {
-            withLock(mutex, "action") {
-                timerJob?.onAction(action)
-            }
-        }
+    override fun getTimestampState(): StateFlow<TimerTimestamp?> {
+        return timerTimestampFlow.asStateFlow()
     }
 
-    override fun stopTimer() {
-        scope.launch {
-            stopSelf()
-        }
-    }
+    override fun getState() = timerStateFlow.asStateFlow()
 
     private suspend fun stopSelf() {
         withLock(mutex, "stop") {
             withContext(NonCancellable) {
+                timerTimestampFlow.value = null
                 stateInvalidateJob?.cancel()
                 timerJob?.cancelAndJoin()
                 timerJob = null
                 stateInvalidateJob = null
-                state.emit(null)
+                timerStateFlow.emit(ControlledTimerState.NotStarted)
                 compositeListeners.onTimerStop()
             }
         }
