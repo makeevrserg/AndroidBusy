@@ -11,7 +11,17 @@ fun TimerApi.updateState(block: (TimerTimestamp?) -> TimerTimestamp?) {
     setTimestampState(newState)
 }
 
-fun TimerApi.togglePause() {
+fun TimerApi.pause() {
+    updateState { state ->
+        if (state?.pause == null) {
+            state?.copy(pause = Clock.System.now())
+        } else {
+            state
+        }
+    }
+}
+
+fun TimerApi.resume() {
     updateState { state ->
         if (state?.pause != null) {
             val diff = Clock.System.now() - state.pause
@@ -20,7 +30,7 @@ fun TimerApi.togglePause() {
                 start = state.start.plus(diff)
             )
         } else {
-            state?.copy(pause = Clock.System.now())
+            state
         }
     }
 }
