@@ -3,6 +3,7 @@ package com.flipperdevices.bsb.timer.common.composable.appbar.stop
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -30,6 +31,8 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.materials.HazeMaterials
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -47,8 +50,12 @@ fun StopSessionComposableContent(
             .navigationBarsPadding()
             .padding(vertical = 40.dp, horizontal = 16.dp)
             .clip(RoundedCornerShape(32.dp))
-            .background(Color(color = 0x99252525))
-            .hazeEffect(hazeState, HazeMaterials.ultraThin())
+            .hazeEffect(
+                hazeState,
+                HazeMaterials.ultraThin(
+                    containerColor = Color.Black.copy(alpha = 0.8f)
+                )
+            )
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(48.dp),
         horizontalAlignment = Alignment.Start,
@@ -64,33 +71,62 @@ fun StopSessionComposableContent(
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            BChipButton(
+            MinorActionButton(
                 modifier = Modifier.weight(1f),
                 onClick = onConfirm,
-                painter = painterResource(Res.drawable.ic_stop),
-                text = stringResource(Res.string.ta_stop),
+                text = Res.string.ta_stop,
+                icon = Res.drawable.ic_stop,
                 contentColor = LocalCorruptedPallet.current
                     .black
                     .invert,
                 background = LocalCorruptedPallet.current
                     .white
-                    .invert,
+                    .invert
             )
-            BChipButton(
+            MinorActionButton(
                 modifier = Modifier.weight(1f),
                 onClick = onDismiss,
-                painter = null,
-                text = stringResource(Res.string.ta_keep_focusing),
+                text = Res.string.ta_keep_focusing,
+                icon = null,
                 contentColor = LocalCorruptedPallet.current
                     .white
                     .invert,
                 background = LocalCorruptedPallet.current
                     .transparent
                     .whiteInvert
-                    .tertiary,
+                    .tertiary
             )
         }
     }
+}
+
+@Composable
+private fun MinorActionButton(
+    onClick: () -> Unit,
+    text: StringResource,
+    icon: DrawableResource?,
+    contentColor: Color,
+    background: Color,
+    modifier: Modifier = Modifier,
+) {
+    BChipButton(
+        modifier = modifier,
+        onClick = onClick,
+        fontSize = 20.sp,
+        iconSize = 13.dp,
+        spacedBy = 8.dp,
+        contentPadding = PaddingValues(
+            all = 16.dp
+        ),
+        painter = if (icon != null) {
+            painterResource(icon)
+        } else {
+            null
+        },
+        text = stringResource(text),
+        contentColor = contentColor,
+        background = background,
+    )
 }
 
 @Preview

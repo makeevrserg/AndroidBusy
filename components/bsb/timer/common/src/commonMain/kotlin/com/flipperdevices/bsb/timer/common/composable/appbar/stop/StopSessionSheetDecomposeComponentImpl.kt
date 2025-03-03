@@ -7,7 +7,6 @@ import com.arkivanov.decompose.router.slot.SlotNavigation
 import com.arkivanov.decompose.router.slot.activate
 import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.router.slot.dismiss
-import com.composables.core.Scrim
 import com.composables.core.SheetDetent
 import com.flipperdevices.ui.sheet.ModalBottomSheetSlot
 import dev.chrisbanes.haze.HazeState
@@ -43,7 +42,6 @@ class StopSessionSheetDecomposeComponentImpl(
             initialDetent = SheetDetent.Hidden,
             onDismiss = { slot.dismiss() },
             content = {
-                Scrim()
                 InvisibleSheet {
                     StopSessionComposableContent(
                         onConfirm = {

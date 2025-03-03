@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.composables.core.ModalBottomSheetScope
 import com.composables.core.Scrim
 
@@ -17,7 +18,9 @@ fun ModalBottomSheetScope.InvisibleSheet(
         modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomEnd
     ) {
-        Scrim()
+        Scrim(
+            scrimColor = Color.Black.copy(alpha = 0.3f)
+        )
         content()
     }
 }

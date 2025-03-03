@@ -106,6 +106,7 @@ fun BChipButton(
     enabled: Boolean = true,
     fontSize: TextUnit = 24.sp,
     iconSize: Dp = 18.dp,
+    spacedBy: Dp = 12.dp,
     contentPadding: PaddingValues = PaddingValues(
         horizontal = 12.dp,
         vertical = 16.dp
@@ -125,7 +126,10 @@ fun BChipButton(
             Row(
                 modifier = Modifier.animateContentSize(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                horizontalArrangement = Arrangement.spacedBy(
+                    spacedBy,
+                    Alignment.CenterHorizontally
+                ),
                 content = {
                     if (painter != null) {
                         Icon(
@@ -178,6 +182,7 @@ fun BChipNotificationBox(
 
 @Composable
 @Preview
+@Suppress("LongMethod")
 private fun BChipButtonPreview() {
     BusyBarThemeInternal {
         Scaffold(backgroundColor = Color.Black) {
@@ -203,7 +208,9 @@ private fun BChipButtonPreview() {
                         painter = painterResource(Res.drawable.ic_preview_pomodoro),
                         onClick = {},
                         background = Color.Transparent,
-                        contentColor = LocalCorruptedPallet.current.transparent.whiteInvert.primary.copy(alpha = 0.5f),
+                        contentColor = LocalCorruptedPallet.current.transparent.whiteInvert.primary.copy(
+                            alpha = 0.5f
+                        ),
                         dashedBorderColor = LocalCorruptedPallet.current.transparent.whiteInvert.tertiary.copy(
                             alpha = 0.1f
                         ),

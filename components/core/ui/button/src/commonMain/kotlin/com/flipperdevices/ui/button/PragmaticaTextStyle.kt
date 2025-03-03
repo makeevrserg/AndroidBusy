@@ -2,6 +2,7 @@ package com.flipperdevices.ui.button
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
+import com.flipperdevices.bsb.core.theme.LocalBusyBarFonts
 
 @Composable
 fun rememberPragmaticaTextStyle(): TextStyle {
@@ -11,6 +12,6 @@ fun rememberPragmaticaTextStyle(): TextStyle {
 //            alignment = LineHeightStyle.Alignment.Bottom,
 //            trim = LineHeightStyle.Trim.LastLineBottom
 //        ),
-//        fontFamily = LocalBusyBarFonts.current.pragmatica,
+        fontFamily = LocalBusyBarFonts.current.pragmatica,
     )
 }

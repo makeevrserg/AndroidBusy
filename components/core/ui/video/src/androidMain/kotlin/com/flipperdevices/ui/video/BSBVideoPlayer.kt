@@ -24,6 +24,7 @@ actual fun BSBVideoPlayer(
         ),
         usePlayerController = false,
         handleAudioFocus = false,
+        handleLifecycle = false, // TODO handle itself
         enablePip = false,
         volume = 0f,
         repeatMode = RepeatMode.ALL

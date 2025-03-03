@@ -62,7 +62,8 @@ fun AppBlockerContentComposable(
             fontSize = 34.sp,
             fontFamily = LocalBusyBarFonts.current.pragmatica,
             fontWeight = FontWeight.W700,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            lineHeight = 40.sp
         )
         Text(
             text = stringResource(

@@ -89,7 +89,7 @@ fun TimerCardComposable(
                 }
             }
             val progress = remember(timerState.timeLeft, totalDuration) {
-                1f - (timerState.timeLeft / totalDuration).toFloat().fastCoerceIn(0f, 1f)
+                (timerState.timeLeft / totalDuration).toFloat().fastCoerceIn(0f, 1f)
             }
 
             LinearProgressIndicator(
