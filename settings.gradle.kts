@@ -32,6 +32,7 @@ dependencyResolutionManagement {
 
 include(
     ":instances:bsb",
+    ":instances:bsb-wear",
     ":instances:videotest",
 
     ":components:core:di",
