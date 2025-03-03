@@ -32,6 +32,7 @@ dependencyResolutionManagement {
 
 include(
     ":instances:bsb",
+    ":instances:videotest",
 
     ":components:core:di",
     ":components:core:activityholder",
@@ -50,6 +51,7 @@ include(
     ":components:core:ui:timeline",
     ":components:core:ui:card-frame",
     ":components:core:ui:res-preview",
+    ":components:core:ui:video",
 
     ":components:bsb:core:theme",
     ":components:bsb:core:res",
