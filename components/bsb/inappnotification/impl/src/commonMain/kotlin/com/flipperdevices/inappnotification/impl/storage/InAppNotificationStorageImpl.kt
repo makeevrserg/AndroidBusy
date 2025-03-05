@@ -71,9 +71,9 @@ class InAppNotificationStorageImpl :
             return
         }
 
-        val notificationToShown = pendingNotification.removeFirst()
+        val notificationToShown = pendingNotification.removeAt(0)
         notificationListener.onNewNotification(notificationToShown)
         nextNotificationTime = Clock.System.now().toEpochMilliseconds() +
-            notificationToShown.duration.inWholeMilliseconds
+                notificationToShown.duration.inWholeMilliseconds
     }
 }
