@@ -18,7 +18,7 @@ configure<BaseExtension> {
 
     buildTypes {
         internal {
-            isShrinkResources = true
+            isShrinkResources = false
             isMinifyEnabled = false
             consumerProguardFile(
                 "proguard-rules.pro"
@@ -29,7 +29,7 @@ configure<BaseExtension> {
             )
         }
         release {
-            isShrinkResources = true
+            isShrinkResources = false
             isMinifyEnabled = false
             consumerProguardFile(
                 "proguard-rules.pro"
