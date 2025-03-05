@@ -5,6 +5,7 @@ import com.flipperdevices.bsb.appblocker.api.FamilyControlApi
 import com.flipperdevices.bsb.preference.model.TimerSettings
 import com.flipperdevices.bsb.timer.background.api.TimerStateListener
 import com.flipperdevices.core.di.AppGraph
+import kotlinx.coroutines.flow.first
 import me.tatarka.inject.annotations.Inject
 import software.amazon.lastmile.kotlin.inject.anvil.ContributesBinding
 import software.amazon.lastmile.kotlin.inject.anvil.SingleIn
@@ -16,13 +17,13 @@ class AppBlockerTimerListener(
     private val appBlockerApi: AppBlockerApi,
     private val familyControlApi: FamilyControlApi
 ) : TimerStateListener {
-    override fun onTimerStart(timerSettings: TimerSettings) {
-        if (appBlockerApi.isAppBlockerSupportActive()) {
+    override suspend fun onTimerStart(timerSettings: TimerSettings) {
+        if (appBlockerApi.isAppBlockerSupportActive().first()) {
             familyControlApi.enableFamilyControls()
         }
     }
 
-    override fun onTimerStop() {
+    override suspend fun onTimerStop() {
         familyControlApi.disableFamilyControls()
     }
 }

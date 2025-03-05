@@ -39,23 +39,19 @@ class UsageStatsLooper(
     private val mutex = Mutex()
     private var job: Job? = null
 
-    fun startLoop() = scope.launch {
-        withLock(mutex, "start") {
-            job?.cancelAndJoin()
-            job = scope.launch {
-                while (isActive) {
-                    loop()
-                    delay(APP_LOCK_LOOP_INTERVAL)
-                }
+    suspend fun startLoop() = withLock(mutex, "start") {
+        job?.cancelAndJoin()
+        job = scope.launch {
+            while (isActive) {
+                loop()
+                delay(APP_LOCK_LOOP_INTERVAL)
             }
         }
     }
 
-    fun stopLoop() = scope.launch {
-        withLock(mutex, "stop") {
-            job?.cancelAndJoin()
-            job = null
-        }
+    suspend fun stopLoop() = withLock(mutex, "stop") {
+        job?.cancelAndJoin()
+        job = null
     }
 
     private suspend fun loop() {

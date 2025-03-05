@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
 internal const val EXTRA_KEY_TIMER_STATE = "timer_state"
@@ -114,8 +115,10 @@ class TimerForegroundService : LifecycleService(), LogTagProvider, TimerStateLis
         stopSelf()
     }
 
-    override fun onTimerStop() {
-        stopServiceInternal()
+    override suspend fun onTimerStop() {
+        withContext(Dispatchers.Main) {
+            stopServiceInternal()
+        }
     }
 
     override fun onDestroy() {

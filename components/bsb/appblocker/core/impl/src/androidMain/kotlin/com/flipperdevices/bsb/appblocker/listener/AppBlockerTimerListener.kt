@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import me.tatarka.inject.annotations.Inject
 import software.amazon.lastmile.kotlin.inject.anvil.ContributesBinding
 import software.amazon.lastmile.kotlin.inject.anvil.SingleIn
@@ -30,10 +32,12 @@ class AppBlockerTimerListener(
     private val timerApi: TimerApi
 ) : TimerStateListener, LogTagProvider {
     override val TAG = "AppBlockerTimer"
+    private val mutex = Mutex()
+
     private var looper: UsageStatsLooper? = null
     private var timerStateListenerJob: Job? = null
 
-    override fun onTimerStart(timerSettings: TimerSettings) {
+    override suspend fun onTimerStart(timerSettings: TimerSettings) {
         timerStateListenerJob?.cancel()
         timerStateListenerJob = combine(
             timerApi.getState(),
@@ -64,18 +68,18 @@ class AppBlockerTimerListener(
             }.launchIn(scope)
     }
 
-    override fun onTimerStop() {
+    override suspend fun onTimerStop() {
         stopLoop()
         timerStateListenerJob?.cancel()
     }
 
-    private fun startLoop() {
+    private suspend fun startLoop() = mutex.withLock {
         info { "Start usage stats looper for app blocker" }
         val nonNullLooper = looper ?: looperFactory().also { looper = it }
         nonNullLooper.startLoop()
     }
 
-    private fun stopLoop() {
+    private suspend fun stopLoop() = mutex.withLock {
         info { "Try to stop looper $looper" }
         looper?.stopLoop()
     }

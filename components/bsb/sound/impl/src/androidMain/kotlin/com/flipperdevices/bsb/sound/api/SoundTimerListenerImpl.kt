@@ -24,7 +24,7 @@ class SoundTimerListenerImpl(
 ) : TimerStateListener {
     private var timerStateListenerJob: Job? = null
 
-    override fun onTimerStart(timerSettings: TimerSettings) {
+    override suspend fun onTimerStart(timerSettings: TimerSettings) {
         timerStateListenerJob?.cancel()
         if (!timerSettings.soundSettings.alertWhenIntervalEnds) {
             return
@@ -42,7 +42,7 @@ class SoundTimerListenerImpl(
         }.launchIn(scope)
     }
 
-    override fun onTimerStop() {
+    override suspend fun onTimerStop() {
         timerStateListenerJob?.cancel()
         runBlocking { soundFromStateProducer.clear() }
     }

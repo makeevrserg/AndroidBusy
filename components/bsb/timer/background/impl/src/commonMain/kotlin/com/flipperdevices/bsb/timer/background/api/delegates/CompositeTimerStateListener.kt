@@ -21,7 +21,7 @@ class CompositeTimerStateListener(
         listeners -= listener
     }
 
-    override fun onTimerStart(timerSettings: TimerSettings) {
+    override suspend fun onTimerStart(timerSettings: TimerSettings) {
         listeners.forEach { listener ->
             runCatching {
                 listener.onTimerStart(timerSettings)
@@ -29,7 +29,7 @@ class CompositeTimerStateListener(
         }
     }
 
-    override fun onTimerStop() {
+    override suspend fun onTimerStop() {
         listeners.forEach { listener ->
             runCatching {
                 listener.onTimerStop()

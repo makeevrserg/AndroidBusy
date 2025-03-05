@@ -21,14 +21,14 @@ class DNDTimerListener(
 
     private val notificationManager by lazy { context.getSystemService(NotificationManager::class.java) }
 
-    override fun onTimerStart(timerSettings: TimerSettings) {
+    override suspend fun onTimerStart(timerSettings: TimerSettings) {
         if (dndApi.isDNDSupportActive()) {
             info { "Receive #onTimerStart and turn on DND" }
             notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE)
         }
     }
 
-    override fun onTimerStop() {
+    override suspend fun onTimerStop() {
         if (dndApi.isDNDSupportActive()) {
             info { "Receive #onTimerStop and turn off DND" }
             notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
