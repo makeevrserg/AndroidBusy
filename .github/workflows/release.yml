@@ -96,7 +96,7 @@ jobs:
         run: |
           mkdir mappings
           mv "${{ steps.download_android_prod.outputs.download-path }}/mapping-android.txt" mappings/
-          mv "${{ steps.download_wear_prod.outputs.download-path }}/mapping-android.txt" mappings/
+          mv "${{ steps.download_wear_prod.outputs.download-path }}/mapping-wear.txt" mappings/
           zip -qq -r mappings.zip mappings
           echo "archive=mappings.zip" >> $GITHUB_OUTPUT
       - name: Prepare other builds
