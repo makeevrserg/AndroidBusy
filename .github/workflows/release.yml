@@ -82,6 +82,7 @@ jobs:
           name: ${{ needs.build_android_flavor_prod.outputs.ARTIFACTS_NAME }}
           path: artifacts/download_android_prod
 
+      # ${{ steps.download_wear_prod.outputs.download-path }}
       - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
         id: download_wear_prod
         with:
@@ -93,7 +94,7 @@ jobs:
         run: |
           mkdir mappings
           mv "${{ steps.download_android_prod.outputs.download-path }}/mapping-android.txt" mappings/
-          mv "${{ steps.build_wear_flavor_prod.outputs.download-path }}/mapping-android.txt" mappings/
+          mv "${{ steps.download_wear_prod.outputs.download-path }}/mapping-android.txt" mappings/
           zip -qq -r mappings.zip mappings
           echo "archive=mappings.zip" >> $GITHUB_OUTPUT
       - name: Prepare other builds
@@ -101,7 +102,7 @@ jobs:
         run: |
           mkdir other
           mv ${{ steps.download_android_prod.outputs.download-path }}/*.aab other/
-          mv ${{ steps.build_wear_flavor_prod.outputs.download-path }}/*.aab other/
+          mv ${{ steps.download_wear_prod.outputs.download-path }}/*.aab other/
           zip -qq -r other.zip other
           echo "archive=other.zip" >> $GITHUB_OUTPUT
       - name: Create Release
@@ -114,7 +115,7 @@ jobs:
             ${{ steps.mappings.outputs.archive }}
             ${{ steps.other.outputs.archive }}
             ${{ steps.download_android_prod.outputs.download-path }}/*.apk
-            ${{ steps.build_wear_flavor_prod.outputs.download-path }}/*.apk
+            ${{ steps.download_wear_prod.outputs.download-path }}/*.apk
             ${{steps.download_desktop.outputs.download-path}}/*
           tag_name: ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
           name: Busy App ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
