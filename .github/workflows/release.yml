@@ -12,6 +12,7 @@ jobs:
     uses: ./.github/workflows/call-build-number.yml
     
   # ${{ needs.build_android_flavor_dev.outputs.ARTIFACTS_OUTPUT_PATH }}
+  # ${{ needs.build_android_flavor_dev.outputs.ARTIFACTS_NAME }}
   build_android_flavor_dev:
     name: "Build android-dev"
     needs: [ build_number ]
