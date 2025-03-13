@@ -1,0 +1,73 @@
+name: Build and publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      FLAVOR_TYPE:
+        type: choice
+        options: [ "PROD","DEV" ]
+        description: "Type of flavor"
+        required: true
+      TRACK:
+        type: choice
+        options: [ "production","test" ]
+        description: "GooglePlay distribution track"
+        required: true
+
+
+jobs:
+  # ${{ needs.build_number.outputs.BUILD_NUMBER }}
+  build_number:
+    name: "Create build number"
+    uses: ./.github/workflows/call-build-number.yml
+
+  # ${{ needs.build_android_flavor_prod.outputs.ARTIFACTS_OUTPUT_PATH }}
+  # ${{ needs.build_android_flavor_prod.outputs.ARTIFACTS_NAME }}
+  build_android_flavor_prod:
+    name: "Build android-prod"
+    needs: [ build_number ]
+    uses: ./.github/workflows/call-assemble-android.yml
+    secrets:
+      SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+      KEY_ALIAS_PASSWORD: ${{ secrets.KEY_ALIAS_PASSWORD }}
+    with:
+      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
+      MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
+      MODULE_PATH: ":instances:bsb"
+      DIR_PATH: "instances/bsb"
+      IDENTIFIER: "android-${{ inputs.FLAVOR_TYPE }}"
+      FLAVOR_TYPE: ${{ inputs.FLAVOR_TYPE }}
+
+  # ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_OUTPUT_PATH }}
+  # ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_NAME }}
+  build_wear_flavor_prod:
+    name: "Build android-prod"
+    needs: [ build_number ]
+    uses: ./.github/workflows/call-assemble-android.yml
+    secrets:
+      SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+      KEY_ALIAS_PASSWORD: ${{ secrets.KEY_ALIAS_PASSWORD }}
+    with:
+      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
+      MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
+      MODULE_PATH: ":instances:bsb-wear"
+      DIR_PATH: "instances/bsb-wear"
+      IDENTIFIER: "wear-${{ inputs.FLAVOR_TYPE }}"
+      FLAVOR_TYPE: ${{ inputs.FLAVOR_TYPE }}
+
+
+  upload_playstore_wear:
+    name: "Upload WearOS PlayStore"
+    needs: [ build_number, build_android_flavor_prod, build_wear_flavor_prod ]
+    uses: ./.github/workflows/call-upload-playstore.yml
+    secrets:
+      GOOGLE_PLAY_PUBLISHER_JSON: ${{ secrets.GOOGLE_PLAY_PUBLISHER_JSON }}
+    with:
+      ARTIFACT_NAME: ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_NAME }}
+      IDENTIFIER: "wear-${{ inputs.FLAVOR_TYPE }}"
+      FLAVOR_TYPE: ${{ inputs.FLAVOR_TYPE }}
+      TRACK: ${{ inputs.track }}
