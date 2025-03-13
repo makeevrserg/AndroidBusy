@@ -15,8 +15,10 @@ jobs:
       - run: |
           echo "FLAVOR_TYPE=PROD" >> $GITHUB_OUTPUT
           echo "GP_TRACK=internal" >> $GITHUB_OUTPUT
+        id: set_env
     outputs:
-      image: ${{ env.MAVEN_VERSION }}
+      FLAVOR_TYPE: ${{ steps.set_env.outputs.FLAVOR_TYPE }}
+      GP_TRACK: ${{ steps.set_env.outputs.GP_TRACK }}
 
   # ${{ needs.build_number.outputs.BUILD_NUMBER }}
   build_number:
