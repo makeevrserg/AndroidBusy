@@ -23,14 +23,10 @@ on:
         MODULE_PATH:
             required: true
             type: string
-        # instances/bsb/build/outputs/apk/release
-        BUILT_APK_PATH:
+        # instances/bsb
+        DIR_PATH:
           required: true
           type: string
-        # instances/bsb/build/outputs/bundle/release
-        BUILT_AAB_PATH:
-            required: true
-            type: string
         # android-dev
         # wearos-dev
         IDENTIFIER:
@@ -67,7 +63,7 @@ jobs:
         id: sign_aab
         uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
         with:
-          releaseDirectory: ${{ inputs.BUILT_AAB_PATH }}
+          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/bundle/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.KEY_ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -79,7 +75,7 @@ jobs:
         id: sign_apk
         uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
         with:
-          releaseDirectory: ${{ inputs.BUILT_APK_PATH }}
+          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.KEY_ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -93,7 +89,7 @@ jobs:
           mkdir artifacts
           cp ${{ steps.sign_aab.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}.aab
           cp ${{ steps.sign_apk.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}.apk
-          cp instances/bsb/build/outputs/mapping/release/mapping.txt artifacts/mapping-${{ inputs.IDENTIFIER }}.txt
+          cp ${{ DIR_PATH }}/outputs/mapping/release/mapping.txt artifacts/mapping-${{ inputs.IDENTIFIER }}.txt
           echo "path=artifacts/" >> $GITHUB_OUTPUT
       - name: Upload Artifacts
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4

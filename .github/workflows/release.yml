@@ -24,8 +24,7 @@ jobs:
     with:
       BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
       MODULE_PATH: ":instances:bsb-test"
-      BUILT_APK_PATH: "instances/bsb-test/build/outputs/apk/release"
-      BUILT_AAB_PATH: "instances/bsb-test/build/outputs/bundle/release"
+      DIR_PATH: "instances/bsb-test"
       IDENTIFIER: "bsbtest"
       FLAVOR_TYPE: "DEV"
 
