@@ -61,43 +61,10 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-#      - name: Build release
-#        env:
-#          ORG_GRADLE_PROJECT_version_code: ${{ inputs.BUILD_NUMBER }}
-#        run: ./gradlew ${{ inputs.MODULE_PATH }}:assembleRelease ${{ inputs.MODULE_PATH }}:bundleRelease
-#      # ${{ steps.sign_aab.outputs.signedReleaseFile }}
-#      - name: Sign AAB
-#        id: sign_aab
-#        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
-#        with:
-#          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/bundle/release
-#          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-#          alias: ${{ secrets.KEY_ALIAS }}
-#          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-#          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
-#        env:
-#          BUILD_TOOLS_VERSION: "34.0.0"
-#      # ${{ steps.sign_apk.outputs.signedReleaseFile }}
-#      - name: Sign APK
-#        id: sign_apk
-#        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
-#        with:
-#          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/apk/release
-#          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-#          alias: ${{ secrets.KEY_ALIAS }}
-#          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-#          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
-#        env:
-#          BUILD_TOOLS_VERSION: "34.0.0"
-      # ${{ steps.artifacts_copy.outputs.path }}
       - name: Copy artifacts
         id: artifacts_copy
         run: |
           mkdir artifacts
-#          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.aab
-#          cp ${{ steps.sign_apk.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.apk
-#          cp ${{ inputs.DIR_PATH }}/build/outputs/mapping/release/mapping.txt artifacts/mapping-${{ inputs.IDENTIFIER }}.txt
-
           touch artifacts/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.aab
           touch artifacts/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.apk
           touch artifacts/mapping-${{ inputs.IDENTIFIER }}.txt
