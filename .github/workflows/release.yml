@@ -89,7 +89,7 @@ jobs:
           files: |
             ${{ steps.mappings.outputs.archive }}
             ${{ steps.other.outputs.archive }}
-            ./artifacts/android/*.apk
+            ${{ steps.download_android_dev.outputs.download-path }}/*.apk
             ${{steps.download-desktop.outputs.download-path}}/*
           tag_name: ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
           name: Busy App ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
