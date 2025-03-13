@@ -79,7 +79,7 @@ jobs:
       ARTIFACT_NAME: ${{ needs.assemble_android.outputs.ARTIFACTS_NAME }}
       IDENTIFIER: "android-${{ needs.env.outputs.FLAVOR_TYPE }}"
       FLAVOR_TYPE: ${{ needs.env.outputs.FLAVOR_TYPE }}
-      TRACK: ${{ env.GP_TRACK }}
+      TRACK: ${{ needs.env.outputs.GP_TRACK }}
 
   upload_playstore_wear:
     name: "Upload PlayStore WearOS-${{ needs.env.outputs.FLAVOR_TYPE }}"
@@ -91,7 +91,7 @@ jobs:
       ARTIFACT_NAME: ${{ needs.assemble_wearos.outputs.ARTIFACTS_NAME }}
       IDENTIFIER: "android-${{ needs.env.outputs.FLAVOR_TYPE }}"
       FLAVOR_TYPE: ${{ needs.env.outputs.FLAVOR_TYPE }}
-      TRACK: ${{ env.GP_TRACK }}
+      TRACK: ${{ needs.env.outputs.GP_TRACK }}
 
   upload_to_github:
     name: Upload to Github Releases
