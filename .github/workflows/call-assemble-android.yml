@@ -49,7 +49,7 @@ on:
         type: string
 
 env:
-  ARTIFACTS_FOLDER_PATH: artifacts
+  ARTIFACTS_FOLDER_PATH: artifacts_android-${{ inputs.IDENTIFIER }}-${{ inputs.FLAVOR_TYPE }}
   ARTIFACT_NAME: artifacts-${{ inputs.IDENTIFIER }}
   MAPPING_FILE: mapping-${{ inputs.IDENTIFIER }}.txt
   APK_NAME: busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.apk
