@@ -14,6 +14,9 @@ on:
       ARTIFACTS_OUTPUT_PATH:
         description: "Uploaded artifacts path"
         value: ${{ jobs.build_upload_artifacts.outputs.ARTIFACTS_OUTPUT_PATH }}
+      ARTIFACTS_NAME:
+        description: "Name of uploaded artifacts"
+        value: ${{ jobs.build_upload_artifacts.outputs.ARTIFACTS_NAME }}
     inputs:
       BUILD_NUMBER:
         required: true
@@ -48,6 +51,7 @@ jobs:
       ORG_GRADLE_PROJECT_current_flavor_type: ${{ inputs.FLAVOR_TYPE }}
     outputs:
       ARTIFACTS_OUTPUT_PATH: ${{ steps.artifacts_copy.outputs.path }}
+      ARTIFACTS_NAME: artifacts-${{ inputs.IDENTIFIER }}-${{ inputs.FLAVOR_TYPE }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -97,5 +101,5 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
         with:
-          name: artifacts
+          name: artifacts-${{ inputs.IDENTIFIER }}-${{ inputs.FLAVOR_TYPE }}
           path: ${{ steps.artifacts_copy.outputs.path }}

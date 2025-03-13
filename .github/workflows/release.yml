@@ -45,29 +45,27 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           submodules: 'recursive'
+      - name: Install zip
+        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
+
+      # ${{ steps.download.outputs.download-path }}
       - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
         id: download
         with:
-          name: artifacts
-          path: download/artifacts
+          name: ${{ needs.build_android_flavor_dev.outputs.ARTIFACTS_NAME }}
+          path: artifacts/
 #      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
 #        id: download-desktop
 #        with:
 #          name: ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
 #          path: download/artifacts-desktop
-      - name: 'Copy artifacts'
-        id: artifacts_copy
-        run: |
-          mkdir artifacts
-          cp ${{steps.download.outputs.download-path}}/* artifacts/
-          echo "path=artifacts/" >> $GITHUB_OUTPUT
-      - name: Install zip
-        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
       - name: Prepare mapping
-        id: mappingsbuild_release
+        id: mappings
         run: |
           mkdir mappings
-          mv "${{ steps.artifacts_copy.outputs.path }}mapping-*.txt" mappings/
+          echo "path=${{ steps.artifacts_copy.outputs.path }}"
+          echo ls ${{ steps.artifacts_copy.outputs.path }}
+          mv "${{ steps.artifacts_copy.outputs.path }}/mapping-*.txt" mappings/
           zip -qq -r mappings.zip mappings
           echo "archive=mappings.zip" >> $GITHUB_OUTPUT
       - name: Prepare other builds
