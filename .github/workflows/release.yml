@@ -63,8 +63,9 @@ jobs:
         id: mappings
         run: |
           mkdir mappings
+          echo "ARTIFACT_NAME=${{ needs.build_android_flavor_dev.outputs.ARTIFACTS_NAME }}"
           echo "path=./artifacts/android"
-          echo ls ./artifacts/android
+          echo "$(ls ./artifacts/android)"
           mv "./artifacts/android/mapping-*.txt" mappings/
           zip -qq -r mappings.zip mappings
           echo "archive=mappings.zip" >> $GITHUB_OUTPUT
