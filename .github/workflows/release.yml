@@ -25,12 +25,12 @@ jobs:
       FLAVOR_TYPE: "DEV"
 
   # ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
-  build_desktop:
-    name: "Build desktop app"
-    needs: [ build_number ]
-    uses: ./.github/workflows/call-desktop-build.yml
-    with:
-      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
+  #build_desktop:
+  #  name: "Build desktop app"
+  #  needs: [ build_number ]
+  #  uses: ./.github/workflows/call-desktop-build.yml
+  #  with:
+  #    BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
 
   upload_to_github:
     name: Upload to Github Releases
