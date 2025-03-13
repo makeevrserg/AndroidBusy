@@ -29,6 +29,7 @@ jobs:
       DIR_PATH: "instances/bsb"
       IDENTIFIER: "android"
       FLAVOR_TYPE: "PROD"
+      IS_STUB: true
 
   # ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_OUTPUT_PATH }}
   # ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_NAME }}
@@ -48,14 +49,15 @@ jobs:
       DIR_PATH: "instances/bsb-wear"
       IDENTIFIER: "wear"
       FLAVOR_TYPE: "PROD"
+      IS_STUB: true
 
   # ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
-  build_desktop:
-    name: "Build desktop app"
-    needs: [ build_number ]
-    uses: ./.github/workflows/call-desktop-build.yml
-    with:
-      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
+#  build_desktop:
+#    name: "Build desktop app"
+#    needs: [ build_number ]
+#    uses: ./.github/workflows/call-desktop-build.yml
+#    with:
+#      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
 
   upload_to_github:
     name: Upload to Github Releases
@@ -69,11 +71,11 @@ jobs:
         uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
 
 
-      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
-        id: download_desktop
-        with:
-          name: ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
-          path: download/artifacts-desktop
+#      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+#        id: download_desktop
+#        with:
+#          name: ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
+#          path: download/artifacts-desktop
 
       # ${{ steps.download_android_prod.outputs.download-path }}
       - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
