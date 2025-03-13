@@ -1,4 +1,4 @@
-name: Create build number
+name: Assemble android-based modules
 on:
   workflow_call:
     secrets:
@@ -49,7 +49,7 @@ env:
 
 jobs:
   build_upload_artifacts:
-    name: Build AAB and APK
+    name: Build AAB and APK ${{ inputs.FLAVOR_TYPE }}-${{ inputs.identifier }}
     runs-on: ubuntu-latest
     env:
       ORG_GRADLE_PROJECT_current_flavor_type: ${{ inputs.FLAVOR_TYPE }}
