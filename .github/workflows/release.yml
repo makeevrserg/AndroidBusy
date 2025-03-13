@@ -11,10 +11,10 @@ jobs:
     name: "Create build number"
     uses: ./.github/workflows/call-build-number.yml
 
-  # ${{ needs.build_android_flavor_dev.outputs.ARTIFACTS_OUTPUT_PATH }}
-  # ${{ needs.build_android_flavor_dev.outputs.ARTIFACTS_NAME }}
-  build_android_flavor_dev:
-    name: "Build android-dev"
+  # ${{ needs.build_android_flavor_prod.outputs.ARTIFACTS_OUTPUT_PATH }}
+  # ${{ needs.build_android_flavor_prod.outputs.ARTIFACTS_NAME }}
+  build_android_flavor_prod:
+    name: "Build android-prod"
     needs: [ build_number ]
     uses: ./.github/workflows/call-assemble-android.yml
     secrets:
@@ -25,24 +25,42 @@ jobs:
     with:
       BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
       MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
-      MODULE_PATH: ":instances:bsb-test"
-      DIR_PATH: "instances/bsb-test"
+      MODULE_PATH: ":instances:bsb"
+      DIR_PATH: "instances/bsb"
       IDENTIFIER: "android"
-      FLAVOR_TYPE: "DEV"
-      IS_STUB: true
+      FLAVOR_TYPE: "PROD"
+
+  # ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_OUTPUT_PATH }}
+  # ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_NAME }}
+  build_wear_flavor_prod:
+    name: "Build android-prod"
+    needs: [ build_number ]
+    uses: ./.github/workflows/call-assemble-android.yml
+    secrets:
+      SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+      KEY_ALIAS_PASSWORD: ${{ secrets.KEY_ALIAS_PASSWORD }}
+    with:
+      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
+      MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
+      MODULE_PATH: ":instances:bsb-wear"
+      DIR_PATH: "instances/bsb-wear"
+      IDENTIFIER: "wear"
+      FLAVOR_TYPE: "PROD"
 
   # ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
-  #build_desktop:
-  #  name: "Build desktop app"
-  #  needs: [ build_number ]
-  #  uses: ./.github/workflows/call-desktop-build.yml
-  #  with:
-  #    BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
+  build_desktop:
+    name: "Build desktop app"
+    needs: [ build_number ]
+    uses: ./.github/workflows/call-desktop-build.yml
+    with:
+      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
 
   upload_to_github:
     name: Upload to Github Releases
     runs-on: ubuntu-latest
-    needs: [ build_android_flavor_dev, build_number ]
+    needs: [ build_android_flavor_prod, build_wear_flavor_prod, build_number ]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -51,31 +69,39 @@ jobs:
         uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
 
 
-      #      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
-      #        id: download-desktop
-      #        with:
-      #          name: ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
-      #          path: download/artifacts-desktop
-
-      # ${{ steps.download_android_dev.outputs.download-path }}
       - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
-        id: download_android_dev
+        id: download_desktop
         with:
-          name: ${{ needs.build_android_flavor_dev.outputs.ARTIFACTS_NAME }}
-          path: artifacts/download_android_dev
+          name: ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
+          path: download/artifacts-desktop
+
+      # ${{ steps.download_android_prod.outputs.download-path }}
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+        id: download_android_prod
+        with:
+          name: ${{ needs.build_android_flavor_prod.outputs.ARTIFACTS_NAME }}
+          path: artifacts/download_android_prod
+
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+        id: download_wear_prod
+        with:
+          name: ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_NAME }}
+          path: artifacts/download_wear_prod
+
       - name: Prepare mapping
         id: mappings
         run: |
           mkdir mappings
-          echo "$(ls ${{ steps.download_android_dev.outputs.download-path }})"
-          mv "${{ steps.download_android_dev.outputs.download-path }}/mapping-android.txt" mappings/
+          mv "${{ steps.download_android_prod.outputs.download-path }}/mapping-android.txt" mappings/
+          mv "${{ steps.build_wear_flavor_prod.outputs.download-path }}/mapping-android.txt" mappings/
           zip -qq -r mappings.zip mappings
           echo "archive=mappings.zip" >> $GITHUB_OUTPUT
       - name: Prepare other builds
         id: other
         run: |
           mkdir other
-          mv ${{ steps.download_android_dev.outputs.download-path }}/*.aab other/
+          mv ${{ steps.download_android_prod.outputs.download-path }}/*.aab other/
+          mv ${{ steps.build_wear_flavor_prod.outputs.download-path }}/*.aab other/
           zip -qq -r other.zip other
           echo "archive=other.zip" >> $GITHUB_OUTPUT
       - name: Create Release
@@ -87,8 +113,9 @@ jobs:
           files: |
             ${{ steps.mappings.outputs.archive }}
             ${{ steps.other.outputs.archive }}
-            ${{ steps.download_android_dev.outputs.download-path }}/*.apk
-            ${{steps.download-desktop.outputs.download-path}}/*
+            ${{ steps.download_android_prod.outputs.download-path }}/*.apk
+            ${{ steps.build_wear_flavor_prod.outputs.download-path }}/*.apk
+            ${{steps.download_desktop.outputs.download-path}}/*
           tag_name: ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
           name: Busy App ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
           draft: false
