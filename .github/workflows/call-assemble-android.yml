@@ -75,41 +75,48 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Build release
-        env:
-          ORG_GRADLE_PROJECT_version_code: ${{ inputs.BUILD_NUMBER }}
-        run: ./gradlew ${{ inputs.MODULE_PATH }}:assembleRelease ${{ inputs.MODULE_PATH }}:bundleRelease
-      # ${{ steps.sign_aab.outputs.signedReleaseFile }}
-      - name: Sign AAB
-        id: sign_aab
-        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
-        with:
-          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/bundle/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
-      # ${{ steps.sign_apk.outputs.signedReleaseFile }}
-      - name: Sign APK
-        id: sign_apk
-        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
-        with:
-          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
-      # ${{ steps.artifacts_copy.outputs.path }}
+#      - name: Build release
+#        env:
+#          ORG_GRADLE_PROJECT_version_code: ${{ inputs.BUILD_NUMBER }}
+#        run: ./gradlew ${{ inputs.MODULE_PATH }}:assembleRelease ${{ inputs.MODULE_PATH }}:bundleRelease
+#      # ${{ steps.sign_aab.outputs.signedReleaseFile }}
+#      - name: Sign AAB
+#        id: sign_aab
+#        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
+#        with:
+#          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/bundle/release
+#          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+#          alias: ${{ secrets.KEY_ALIAS }}
+#          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+#          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
+#        env:
+#          BUILD_TOOLS_VERSION: "34.0.0"
+#      # ${{ steps.sign_apk.outputs.signedReleaseFile }}
+#      - name: Sign APK
+#        id: sign_apk
+#        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
+#        with:
+#          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/apk/release
+#          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+#          alias: ${{ secrets.KEY_ALIAS }}
+#          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+#          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
+#        env:
+#          BUILD_TOOLS_VERSION: "34.0.0"
+#      # ${{ steps.artifacts_copy.outputs.path }}
+#      - name: Copy artifacts
+#        run: |
+#          mkdir ${{ env.ARTIFACTS_FOLDER_PATH }}
+#          cp ${{ steps.sign_apk.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }}
+#          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }}
+#          cp ${{ inputs.DIR_PATH }}/build/outputs/mapping/release/mapping.txt ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.MAPPING_FILE }}
+
       - name: Copy artifacts
         run: |
           mkdir ${{ env.ARTIFACTS_FOLDER_PATH }}
-          cp ${{ steps.sign_apk.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }}
-          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }}
-          cp ${{ inputs.DIR_PATH }}/build/outputs/mapping/release/mapping.txt ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.MAPPING_FILE }}
+          echo ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }} >> ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }}
+          echo ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }} >> ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }}
+          echo ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.MAPPING_FILE }} >> ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.MAPPING_FILE }}
       - name: Upload Artifacts
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
         with:
