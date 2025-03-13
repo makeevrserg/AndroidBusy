@@ -15,36 +15,39 @@ on:
         description: "Uploaded artifacts path"
         value: ${{ jobs.build_upload_artifacts.outputs.ARTIFACTS_OUTPUT_PATH }}
     inputs:
-        BUILD_NUMBER:
-          required: true
-          type: string
-        # :instances:app
-        # :instances:wear 
-        MODULE_PATH:
-            required: true
-            type: string
-        # instances/bsb
-        DIR_PATH:
-          required: true
-          type: string
-        # android-dev
-        # wearos-dev
-        IDENTIFIER:
-          required: true
-          type: string
-        FLAVOR_TYPE:
-            required: true
-            type: string
-          
+      BUILD_NUMBER:
+        required: true
+        type: string
+      MAJOR_VERSION:
+        required: true
+        type: string
+      # :instances:app
+      # :instances:wear
+      MODULE_PATH:
+        required: true
+        type: string
+      # instances/bsb
+      DIR_PATH:
+        required: true
+        type: string
+      # android-dev
+      # wearos-dev
+      IDENTIFIER:
+        required: true
+        type: string
+      FLAVOR_TYPE:
+        required: true
+        type: string
+
 
 jobs:
   build_upload_artifacts:
     name: Build AAB and APK
     runs-on: ubuntu-latest
     env:
-        ORG_GRADLE_PROJECT_current_flavor_type: ${{ inputs.FLAVOR_TYPE }}
+      ORG_GRADLE_PROJECT_current_flavor_type: ${{ inputs.FLAVOR_TYPE }}
     outputs:
-        ARTIFACTS_OUTPUT_PATH: ${{ steps.artifacts_copy.outputs.path }}
+      ARTIFACTS_OUTPUT_PATH: ${{ steps.artifacts_copy.outputs.path }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -87,8 +90,8 @@ jobs:
         id: artifacts_copy
         run: |
           mkdir artifacts
-          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}.aab
-          cp ${{ steps.sign_apk.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}.apk
+          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.aab
+          cp ${{ steps.sign_apk.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.apk
           cp ${{ inputs.DIR_PATH }}/build/outputs/mapping/release/mapping.txt artifacts/mapping-${{ inputs.IDENTIFIER }}.txt
           echo "path=artifacts/" >> $GITHUB_OUTPUT
       - name: Upload Artifacts
