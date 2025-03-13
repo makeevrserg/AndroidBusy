@@ -1,4 +1,4 @@
-name: Build and publish
+name: Manually release to GP
 
 on:
   workflow_dispatch:
@@ -21,10 +21,10 @@ jobs:
     name: "Create build number"
     uses: ./.github/workflows/call-build-number.yml
 
-  # ${{ needs.build_android_flavor_prod.outputs.ARTIFACTS_OUTPUT_PATH }}
-  # ${{ needs.build_android_flavor_prod.outputs.ARTIFACTS_NAME }}
-  build_android_flavor_prod:
-    name: "Build android-prod"
+  # ${{ needs.build_android.outputs.ARTIFACTS_OUTPUT_PATH }}
+  # ${{ needs.build_android.outputs.ARTIFACTS_NAME }}
+  build_android:
+    name: "Build Android"
     needs: [ build_number ]
     uses: ./.github/workflows/call-assemble-android.yml
     secrets:
@@ -40,10 +40,10 @@ jobs:
       IDENTIFIER: "android-${{ inputs.FLAVOR_TYPE }}"
       FLAVOR_TYPE: ${{ inputs.FLAVOR_TYPE }}
 
-  # ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_OUTPUT_PATH }}
-  # ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_NAME }}
-  build_wear_flavor_prod:
-    name: "Build android-prod"
+  # ${{ needs.build_wear.outputs.ARTIFACTS_OUTPUT_PATH }}
+  # ${{ needs.build_wear.outputs.ARTIFACTS_NAME }}
+  build_wear:
+    name: "Build WearOS"
     needs: [ build_number ]
     uses: ./.github/workflows/call-assemble-android.yml
     secrets:
@@ -62,12 +62,24 @@ jobs:
 
   upload_playstore_wear:
     name: "Upload WearOS PlayStore"
-    needs: [ build_number, build_android_flavor_prod, build_wear_flavor_prod ]
+    needs: [ build_number, build_wear ]
     uses: ./.github/workflows/call-upload-playstore.yml
     secrets:
       GOOGLE_PLAY_PUBLISHER_JSON: ${{ secrets.GOOGLE_PLAY_PUBLISHER_JSON }}
     with:
-      ARTIFACT_NAME: ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_NAME }}
+      ARTIFACT_NAME: ${{ needs.build_wear.outputs.ARTIFACTS_NAME }}
       IDENTIFIER: "wear-${{ inputs.FLAVOR_TYPE }}"
+      FLAVOR_TYPE: ${{ inputs.FLAVOR_TYPE }}
+      TRACK: ${{ inputs.track }}
+
+  upload_playstore_android:
+    name: "Upload Android PlayStore"
+    needs: [ build_number, build_android ]
+    uses: ./.github/workflows/call-upload-playstore.yml
+    secrets:
+      GOOGLE_PLAY_PUBLISHER_JSON: ${{ secrets.GOOGLE_PLAY_PUBLISHER_JSON }}
+    with:
+      ARTIFACT_NAME: ${{ needs.build_android.outputs.ARTIFACTS_NAME }}
+      IDENTIFIER: "android-${{ inputs.FLAVOR_TYPE }}"
       FLAVOR_TYPE: ${{ inputs.FLAVOR_TYPE }}
       TRACK: ${{ inputs.track }}
