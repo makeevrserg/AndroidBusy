@@ -38,6 +38,10 @@ on:
       FLAVOR_TYPE:
         required: true
         type: string
+      IS_STUB:
+        required: false
+        type: boolean
+        default: false
 
 env:
   ARTIFACTS_FOLDER_PATH: artifacts
@@ -60,7 +64,40 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - name: Build release
+        if: ${{ inputs.IS_STUB == false }}
+        env:
+          ORG_GRADLE_PROJECT_version_code: ${{ inputs.BUILD_NUMBER }}
+        run: ./gradlew ${{ inputs.MODULE_PATH }}:assembleRelease ${{ inputs.MODULE_PATH }}:bundleRelease
+      # ${{ steps.sign_aab.outputs.signedReleaseFile }}
+      - name: Sign AAB
+        id: sign_aab
+        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
+        if: ${{ inputs.IS_STUB == false }}
+        with:
+          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/bundle/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+      # ${{ steps.sign_apk.outputs.signedReleaseFile }}
+      - name: Sign APK
+        id: sign_apk
+        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
+        if: ${{ inputs.IS_STUB == false }}
+        with:
+          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+      # ${{ steps.artifacts_copy.outputs.path }}
       - name: Copy artifacts
+        if: ${{ inputs.IS_STUB == true }}
         run: |
           mkdir ${{ env.ARTIFACTS_FOLDER_PATH }}
           echo HelloWorld >> ${{ env.ARTIFACTS_FOLDER_PATH }}/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.aab
