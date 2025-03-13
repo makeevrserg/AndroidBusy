@@ -40,7 +40,7 @@ on:
         type: string
 
 env:
-  ARTIFACTS_FOLDER_PATH: artifacts/
+  ARTIFACTS_FOLDER_PATH: artifacts
   ARTIFACT_NAME: artifacts-${{ inputs.IDENTIFIER }}-${{ inputs.FLAVOR_TYPE }}
 
 jobs:
