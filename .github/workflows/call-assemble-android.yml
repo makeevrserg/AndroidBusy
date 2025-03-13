@@ -41,16 +41,6 @@ jobs:
   build_upload_artifacts:
     name: Build AAB and APK
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - ext: "apk"
-            release_directory: "${{ inputs.DIR_PATH }}/build/outputs/apk/release"
-            task: ./gradlew ${{ inputs.MODULE_PATH }}:assembleRelease
-          - ext: "aab"
-            release_directory: "${{ inputs.DIR_PATH }}/build/outputs/bundle/release"
-            task: ./gradlew ${{ inputs.MODULE_PATH }}:bundleRelease
-
     env:
         ORG_GRADLE_PROJECT_current_flavor_type: ${{ inputs.FLAVOR_TYPE }}
     outputs:
@@ -67,13 +57,25 @@ jobs:
       - name: Build release
         env:
           ORG_GRADLE_PROJECT_version_code: ${{ inputs.BUILD_NUMBER }}
-        run: ${{ matrix.task }}
-      # ${{ steps.sign.outputs.signedReleaseFile }}
+        run: ./gradlew ${{ inputs.MODULE_PATH }}:assembleRelease ${{ inputs.MODULE_PATH }}:bundleRelease
+      # ${{ steps.sign_aab.outputs.signedReleaseFile }}
       - name: Sign AAB
-        id: sign
+        id: sign_aab
         uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
         with:
-          releaseDirectory: ${{ matrix.release_directory }}
+          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/bundle/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+      # ${{ steps.sign_apk.outputs.signedReleaseFile }}
+      - name: Sign APK
+        id: sign_apk
+        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
+        with:
+          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.KEY_ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -85,7 +87,8 @@ jobs:
         id: artifacts_copy
         run: |
           mkdir artifacts
-          cp ${{ steps.sign.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}.${{ matrix.ext }}
+          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}.aab
+          cp ${{ steps.sign_apk.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}.apk
           cp ${{ inputs.DIR_PATH }}/outputs/mapping/release/mapping.txt artifacts/mapping-${{ inputs.IDENTIFIER }}.txt
           echo "path=artifacts/" >> $GITHUB_OUTPUT
       - name: Upload Artifacts
