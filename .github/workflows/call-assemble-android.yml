@@ -39,6 +39,9 @@ on:
         required: true
         type: string
 
+env:
+  ARTIFACTS_FOLDER_PATH: artifacts/
+  ARTIFACT_NAME: artifacts-${{ inputs.IDENTIFIER }}-${{ inputs.FLAVOR_TYPE }}
 
 jobs:
   build_upload_artifacts:
@@ -47,7 +50,7 @@ jobs:
     env:
       ORG_GRADLE_PROJECT_current_flavor_type: ${{ inputs.FLAVOR_TYPE }}
     outputs:
-      ARTIFACTS_NAME: artifacts-${{ inputs.IDENTIFIER }}-${{ inputs.FLAVOR_TYPE }}
+      ARTIFACTS_NAME: $ARTIFACT_NAME
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -58,15 +61,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Copy artifacts
-        id: artifacts_copy
         run: |
-          mkdir artifacts
-          echo HelloWorld >> artifacts/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.aab
-          echo HelloWorld >> artifacts/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.apk
-          echo HelloWorld >> artifacts/mapping-${{ inputs.IDENTIFIER }}.txt
-          echo "path=artifacts/" >> $GITHUB_OUTPUT
+          mkdir $ARTIFACTS_FOLDER_PATH
+          echo HelloWorld >> $ARTIFACTS_FOLDER_PATH/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.aab
+          echo HelloWorld >> $ARTIFACTS_FOLDER_PATH/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.apk
+          echo HelloWorld >> $ARTIFACTS_FOLDER_PATH/mapping-${{ inputs.IDENTIFIER }}.txt
       - name: Upload Artifacts
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
         with:
-          name: artifacts-${{ inputs.IDENTIFIER }}-${{ inputs.FLAVOR_TYPE }}
-          path: ${{ steps.artifacts_copy.outputs.path }}
+          name: $ARTIFACT_NAME
+          path: $$ARTIFACTS_FOLDER_PATH
