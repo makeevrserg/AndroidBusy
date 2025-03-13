@@ -63,16 +63,16 @@ jobs:
         id: mappings
         run: |
           mkdir mappings
-          echo "path=${{ steps.download_android.outputs.path }}"
-          echo ls ${{ steps.download_android.outputs.path }}
-          mv "${{ steps.download_android.outputs.path }}/mapping-*.txt" mappings/
+          echo "path=./artifacts/android"
+          echo ls ./artifacts/android
+          mv "./artifacts/android/mapping-*.txt" mappings/
           zip -qq -r mappings.zip mappings
           echo "archive=mappings.zip" >> $GITHUB_OUTPUT
       - name: Prepare other builds
         id: other
         run: |
           mkdir other
-          mv ${{ steps.download_android.outputs.path }}/*.aab other/
+          mv ./artifacts/android/*.aab other/
           zip -qq -r other.zip other
           echo "archive=other.zip" >> $GITHUB_OUTPUT
       - name: 'Set variables'
@@ -89,7 +89,7 @@ jobs:
           files: |
             ${{ steps.mappings.outputs.archive }}
             ${{ steps.other.outputs.archive }}
-            ${{ steps.download_android.outputs.path }}/*.apk
+            ./artifacts/android/*.apk
             ${{steps.download-desktop.outputs.download-path}}/*
           tag_name: ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
           name: Busy App ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
