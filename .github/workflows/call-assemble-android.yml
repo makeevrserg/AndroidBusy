@@ -14,6 +14,15 @@ on:
       ARTIFACTS_NAME:
         description: "Name of uploaded artifacts"
         value: ${{ jobs.build_upload_artifacts.outputs.ARTIFACTS_NAME }}
+      MAPPING_FILE:
+        description: "Name of the mapping file"
+        value: ${{ jobs.build_upload_artifacts.outputs.MAPPING_FILE }}
+      APK_NAME:
+        description: "Name of the .apk file"
+        value: ${{ jobs.build_upload_artifacts.outputs.APK_NAME }}
+      AAB_NAME:
+        description: "Name of the .aab file"
+        value: ${{ jobs.build_upload_artifacts.outputs.AAB_NAME }}
     inputs:
       BUILD_NUMBER:
         required: true
@@ -42,6 +51,9 @@ on:
 env:
   ARTIFACTS_FOLDER_PATH: artifacts
   ARTIFACT_NAME: artifacts-${{ inputs.IDENTIFIER }}-${{ inputs.FLAVOR_TYPE }}
+  MAPPING_FILE: mapping-${{ inputs.IDENTIFIER }}.txt
+  APK_NAME: busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.apk
+  AAB_NAME: busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.aab
 
 jobs:
   build_upload_artifacts:
@@ -51,6 +63,9 @@ jobs:
       ORG_GRADLE_PROJECT_current_flavor_type: ${{ inputs.FLAVOR_TYPE }}
     outputs:
       ARTIFACTS_NAME: ${{ env.ARTIFACT_NAME }}
+      MAPPING_FILE: ${{ env.MAPPING_FILE }}
+      APK_NAME: ${{ env.APK_NAME }}
+      AAB_NAME: ${{ env.AAB_NAME }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -92,9 +107,9 @@ jobs:
       - name: Copy artifacts
         run: |
           mkdir ${{ env.ARTIFACTS_FOLDER_PATH }}
-          cp ${{ steps.sign_apk.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.apk
-          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.aab
-          cp ${{ inputs.DIR_PATH }}/build/outputs/mapping/release/mapping.txt ${{ env.ARTIFACTS_FOLDER_PATH }}/mapping-${{ inputs.IDENTIFIER }}.txt
+          cp ${{ steps.sign_apk.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }}
+          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }}
+          cp ${{ inputs.DIR_PATH }}/build/outputs/mapping/release/mapping.txt ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.MAPPING_FILE }}
       - name: Upload Artifacts
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
         with:

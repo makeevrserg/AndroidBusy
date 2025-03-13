@@ -5,6 +5,12 @@ on:
       GOOGLE_PLAY_PUBLISHER_JSON:
         required: true
     inputs:
+      AAB_FILE:
+        required: true
+        type: string
+      MAPPING_FILE:
+        required: true
+        type: string
       ARTIFACT_NAME:
         required: true
         type: string
@@ -32,7 +38,7 @@ jobs:
       - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
         id: download_artifact
         with:
-          name: ${{ needs.build_android_flavor_prod.outputs.ARTIFACTS_NAME }}
+          name: ${{ inputs.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACTS_FOLDER_PATH }}
 
       - name: Upload to Play Store ${{ inputs.FLAVOR_TYPE }}-${{ inputs.IDENTIFIER }}
@@ -40,6 +46,6 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_PUBLISHER_JSON }}
           packageName: com.flipperdevices.bsb
-          releaseFiles: ${{ steps.download_artifact.outputs.download-path }}/*.aab
+          releaseFiles: ${{ steps.download_artifact.outputs.download-path }}/${{ inputs.AAB_FILE }}
           track: ${{ inputs.TRACK }}
-          mappingFile: ${{ steps.download_artifact.outputs.download-path }}/mapping-${{ inputs.IDENTIFIER }}.txt
+          mappingFile: ${{ steps.download_artifact.outputs.download-path }}/${{ inputs.MAPPING_FILE }}

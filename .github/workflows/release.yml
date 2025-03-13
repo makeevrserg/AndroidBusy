@@ -82,6 +82,8 @@ jobs:
       IDENTIFIER: "android-${{ needs.env.outputs.FLAVOR_TYPE }}"
       FLAVOR_TYPE: ${{ needs.env.outputs.FLAVOR_TYPE }}
       TRACK: ${{ needs.env.outputs.GP_TRACK }}
+      AAB_FILE: ${{ needs.assemble_android.outputs.AAB_FILE }}
+      MAPPING_FILE: ${{ needs.assemble_android.outputs.MAPPING_FILE }}
 
   upload_playstore_wear:
     name: "Upload PlayStore WearOS-${{ needs.env.outputs.FLAVOR_TYPE }}"
@@ -94,6 +96,8 @@ jobs:
       IDENTIFIER: "android-${{ needs.env.outputs.FLAVOR_TYPE }}"
       FLAVOR_TYPE: ${{ needs.env.outputs.FLAVOR_TYPE }}
       TRACK: ${{ needs.env.outputs.GP_TRACK }}
+      AAB_FILE: ${{ needs.assemble_wearos.outputs.AAB_FILE }}
+      MAPPING_FILE: ${{ needs.assemble_wearos.outputs.MAPPING_FILE }}
 
   upload_to_github:
     name: Upload to Github Releases
@@ -130,16 +134,16 @@ jobs:
         id: mappings
         run: |
           mkdir mappings
-          mv "${{ steps.download_android_prod.outputs.download-path }}/mapping-android-${{ needs.env.outputs.FLAVOR_TYPE }}.txt" mappings/
-          mv "${{ steps.download_wear_prod.outputs.download-path }}/mapping-wear-${{ needs.env.outputs.FLAVOR_TYPE }}.txt" mappings/
+          mv "${{ steps.download_android_prod.outputs.download-path }}/${{ needs.assemble_android.outputs.MAPPING_FILE }}" mappings/
+          mv "${{ steps.download_wear_prod.outputs.download-path }}/${{ needs.assemble_wearos.outputs.MAPPING_FILE }}" mappings/
           zip -qq -r mappings.zip mappings
           echo "archive=mappings.zip" >> $GITHUB_OUTPUT
       - name: Prepare other builds
         id: other
         run: |
           mkdir other
-          mv ${{ steps.download_android_prod.outputs.download-path }}/*.aab other/
-          mv ${{ steps.download_wear_prod.outputs.download-path }}/*.aab other/
+          mv ${{ steps.download_android_prod.outputs.download-path }}/${{ needs.assemble_android.outputs.AAB_NAME }} other/
+          mv ${{ steps.download_wear_prod.outputs.download-path }}/${{ needs.assemble_wearos.outputs.AAB_NAME }} other/
           zip -qq -r other.zip other
           echo "archive=other.zip" >> $GITHUB_OUTPUT
       - name: Create Release
@@ -151,8 +155,8 @@ jobs:
           files: |
             ${{ steps.mappings.outputs.archive }}
             ${{ steps.other.outputs.archive }}
-            ${{ steps.download_android_prod.outputs.download-path }}/*.apk
-            ${{ steps.download_wear_prod.outputs.download-path }}/*.apk
+            ${{ steps.download_android_prod.outputs.download-path }}/${{ needs.assemble_android.outputs.APK_NAME }}
+            ${{ steps.download_wear_prod.outputs.download-path }}/${{ needs.assemble_wearos.outputs.APK_NAME }}
 #            ${{steps.download_desktop.outputs.download-path}}/*
           tag_name: ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
           name: Busy App ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
