@@ -108,14 +108,14 @@ jobs:
 #        run: |
 #          mkdir ${{ env.ARTIFACTS_FOLDER_PATH }}
 #          cp ${{ steps.sign_apk.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }}
-#          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }}
+#          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.AAB_NAME }}
 #          cp ${{ inputs.DIR_PATH }}/build/outputs/mapping/release/mapping.txt ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.MAPPING_FILE }}
 
       - name: Copy artifacts
         run: |
           mkdir ${{ env.ARTIFACTS_FOLDER_PATH }}
           echo ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }} >> ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }}
-          echo ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }} >> ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.APK_NAME }}
+          echo ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.AAB_NAME }} >> ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.AAB_NAME }}
           echo ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.MAPPING_FILE }} >> ${{ env.ARTIFACTS_FOLDER_PATH }}/${{ env.MAPPING_FILE }}
       - name: Upload Artifacts
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4

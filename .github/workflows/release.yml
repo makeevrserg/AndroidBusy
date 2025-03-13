@@ -41,7 +41,7 @@ jobs:
       MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
       MODULE_PATH: ":instances:bsb"
       DIR_PATH: "instances/bsb"
-      IDENTIFIER: "android-${{ needs.env.outputs.FLAVOR_TYPE }}"
+      IDENTIFIER: "android"
       FLAVOR_TYPE: ${{ needs.env.outputs.FLAVOR_TYPE }}
 
   # ${{ needs.assemble_wearos.outputs.ARTIFACTS_OUTPUT_PATH }}
@@ -60,7 +60,7 @@ jobs:
       MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
       MODULE_PATH: ":instances:bsb-wear"
       DIR_PATH: "instances/bsb-wear"
-      IDENTIFIER: "wear-${{ needs.env.outputs.FLAVOR_TYPE }}"
+      IDENTIFIER: "wear"
       FLAVOR_TYPE: ${{ needs.env.outputs.FLAVOR_TYPE }}
 
   # ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
