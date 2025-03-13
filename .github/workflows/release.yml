@@ -50,10 +50,10 @@ jobs:
 
       # ${{ steps.download.outputs.download-path }}
       - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
-        id: download
+        id: download_android
         with:
           name: ${{ needs.build_android_flavor_dev.outputs.ARTIFACTS_NAME }}
-          path: artifacts/
+          path: ./artifacts/android
 #      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
 #        id: download-desktop
 #        with:
@@ -63,16 +63,16 @@ jobs:
         id: mappings
         run: |
           mkdir mappings
-          echo "path=${{ steps.artifacts_copy.outputs.path }}"
-          echo ls ${{ steps.artifacts_copy.outputs.path }}
-          mv "${{ steps.artifacts_copy.outputs.path }}/mapping-*.txt" mappings/
+          echo "path=${{ steps.download_android.outputs.path }}"
+          echo ls ${{ steps.download_android.outputs.path }}
+          mv "${{ steps.download_android.outputs.path }}/mapping-*.txt" mappings/
           zip -qq -r mappings.zip mappings
           echo "archive=mappings.zip" >> $GITHUB_OUTPUT
       - name: Prepare other builds
         id: other
         run: |
           mkdir other
-          mv ${{ steps.artifacts_copy.outputs.path }}/*.aab other/
+          mv ${{ steps.download_android.outputs.path }}/*.aab other/
           zip -qq -r other.zip other
           echo "archive=other.zip" >> $GITHUB_OUTPUT
       - name: 'Set variables'
@@ -89,7 +89,7 @@ jobs:
           files: |
             ${{ steps.mappings.outputs.archive }}
             ${{ steps.other.outputs.archive }}
-            ${{ steps.artifacts_copy.outputs.path }}/*.apk
+            ${{ steps.download_android.outputs.path }}/*.apk
             ${{steps.download-desktop.outputs.download-path}}/*
           tag_name: ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
           name: Busy App ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
