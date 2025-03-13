@@ -29,7 +29,6 @@ jobs:
       DIR_PATH: "instances/bsb"
       IDENTIFIER: "android"
       FLAVOR_TYPE: "PROD"
-      IS_STUB: false
 
   # ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_OUTPUT_PATH }}
   # ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_NAME }}
@@ -49,7 +48,6 @@ jobs:
       DIR_PATH: "instances/bsb-wear"
       IDENTIFIER: "wear"
       FLAVOR_TYPE: "PROD"
-      IS_STUB: false
 
   # ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
   build_desktop:
