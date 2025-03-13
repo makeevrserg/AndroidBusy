@@ -94,7 +94,7 @@ jobs:
           mkdir ${{ env.ARTIFACTS_FOLDER_PATH }}
           cp ${{ steps.sign_apk.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.aab
           cp ${{ steps.sign_aab.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.apk
-          cp ${{ inputs.DIR_PATH }}/outputs/mapping/release/mapping.txt ${{ env.ARTIFACTS_FOLDER_PATH }}/mapping-${{ inputs.IDENTIFIER }}.txt
+          cp ${{ inputs.DIR_PATH }}/build/outputs/mapping/release/mapping.txt ${{ env.ARTIFACTS_FOLDER_PATH }}/mapping-${{ inputs.IDENTIFIER }}.txt
       - name: Upload Artifacts
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
         with:
