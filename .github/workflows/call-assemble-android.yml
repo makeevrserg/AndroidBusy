@@ -89,7 +89,7 @@ jobs:
           mkdir artifacts
           cp ${{ steps.sign_aab.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}.aab
           cp ${{ steps.sign_apk.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}.apk
-          cp ${{ DIR_PATH }}/outputs/mapping/release/mapping.txt artifacts/mapping-${{ inputs.IDENTIFIER }}.txt
+          cp ${{ inputs.DIR_PATH }}/outputs/mapping/release/mapping.txt artifacts/mapping-${{ inputs.IDENTIFIER }}.txt
           echo "path=artifacts/" >> $GITHUB_OUTPUT
       - name: Upload Artifacts
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
