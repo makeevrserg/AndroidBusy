@@ -1,6 +1,15 @@
 name: Create build number
 on:
   workflow_call:
+    secrets:
+      SIGNING_KEY:
+        required: true
+      KEY_ALIAS:
+        required: true
+      KEY_STORE_PASSWORD:
+        required: true
+      KEY_ALIAS_PASSWORD:
+        required: true
     outputs:
       ARTIFACTS_OUTPUT_PATH:
         description: "Uploaded artifacts path"

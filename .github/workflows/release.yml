@@ -16,6 +16,11 @@ jobs:
     name: "Build android-dev"
     needs: [ build_number ]
     uses: ./.github/workflows/call-assemble-android.yml
+    secrets:
+      SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+      KEY_ALIAS_PASSWORD: ${{ secrets.KEY_ALIAS_PASSWORD }}
     with:
       BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
       MODULE_PATH: ":instances:bsb-test"
