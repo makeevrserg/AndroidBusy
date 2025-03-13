@@ -5,16 +5,20 @@ on:
     branches:
       - 'main'
 
+env:
+  FLAVOR_TYPE: PROD
+  GP_TRACK: internal
+
 jobs:
   # ${{ needs.build_number.outputs.BUILD_NUMBER }}
   build_number:
     name: "Create build number"
     uses: ./.github/workflows/call-build-number.yml
 
-  # ${{ needs.build_android_flavor_prod.outputs.ARTIFACTS_OUTPUT_PATH }}
-  # ${{ needs.build_android_flavor_prod.outputs.ARTIFACTS_NAME }}
-  build_android_flavor_prod:
-    name: "Build android-prod"
+  # ${{ needs.assemble_android.outputs.ARTIFACTS_OUTPUT_PATH }}
+  # ${{ needs.assemble_android.outputs.ARTIFACTS_NAME }}
+  assemble_android:
+    name: "Assemble Android-${{ env.FLAVOR_TYPE }}"
     needs: [ build_number ]
     uses: ./.github/workflows/call-assemble-android.yml
     secrets:
@@ -27,13 +31,13 @@ jobs:
       MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
       MODULE_PATH: ":instances:bsb"
       DIR_PATH: "instances/bsb"
-      IDENTIFIER: "android"
-      FLAVOR_TYPE: "PROD"
+      IDENTIFIER: "android-${{ env.FLAVOR_TYPE }}"
+      FLAVOR_TYPE: ${{ env.FLAVOR_TYPE }}
 
-  # ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_OUTPUT_PATH }}
-  # ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_NAME }}
-  build_wear_flavor_prod:
-    name: "Build android-prod"
+  # ${{ needs.assemble_wearos.outputs.ARTIFACTS_OUTPUT_PATH }}
+  # ${{ needs.assemble_wearos.outputs.ARTIFACTS_NAME }}
+  assemble_wearos:
+    name: "Assemble WearOS-${{ env.FLAVOR_TYPE }}"
     needs: [ build_number ]
     uses: ./.github/workflows/call-assemble-android.yml
     secrets:
@@ -46,8 +50,8 @@ jobs:
       MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
       MODULE_PATH: ":instances:bsb-wear"
       DIR_PATH: "instances/bsb-wear"
-      IDENTIFIER: "wear"
-      FLAVOR_TYPE: "PROD"
+      IDENTIFIER: "wear-${{ env.FLAVOR_TYPE }}"
+      FLAVOR_TYPE: ${{ env.FLAVOR_TYPE }}
 
   # ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
   build_desktop:
@@ -57,10 +61,34 @@ jobs:
     with:
       BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
 
+  upload_playstore_android:
+    name: "Upload PlayStore Android-${{ env.FLAVOR_TYPE }}"
+    needs: [ build_number, assemble_android ]
+    uses: ./.github/workflows/call-upload-playstore.yml
+    secrets:
+      GOOGLE_PLAY_PUBLISHER_JSON: ${{ secrets.GOOGLE_PLAY_PUBLISHER_JSON }}
+    with:
+      ARTIFACT_NAME: ${{ needs.assemble_android.outputs.ARTIFACTS_NAME }}
+      IDENTIFIER: "android-${{ env.FLAVOR_TYPE }}"
+      FLAVOR_TYPE: ${{ env.FLAVOR_TYPE }}
+      TRACK: ${{ env.GP_TRACK }}
+  
+  upload_playstore_wear:
+    name: "Upload PlayStore WearOS-${{ env.FLAVOR_TYPE }}"
+    needs: [ build_number, assemble_wearos ]
+    uses: ./.github/workflows/call-upload-playstore.yml
+    secrets:
+      GOOGLE_PLAY_PUBLISHER_JSON: ${{ secrets.GOOGLE_PLAY_PUBLISHER_JSON }}
+    with:
+      ARTIFACT_NAME: ${{ needs.assemble_wearos.outputs.ARTIFACTS_NAME }}
+      IDENTIFIER: "android-${{ env.FLAVOR_TYPE }}"
+      FLAVOR_TYPE: ${{ env.FLAVOR_TYPE }}
+      TRACK: ${{ env.GP_TRACK }}
+  
   upload_to_github:
     name: Upload to Github Releases
     runs-on: ubuntu-latest
-    needs: [ build_android_flavor_prod, build_wear_flavor_prod, build_desktop, build_number ]
+    needs: [ assemble_android, assemble_wearos, build_desktop, build_number ]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -78,14 +106,14 @@ jobs:
       - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
         id: download_android_prod
         with:
-          name: ${{ needs.build_android_flavor_prod.outputs.ARTIFACTS_NAME }}
+          name: ${{ needs.assemble_android.outputs.ARTIFACTS_NAME }}
           path: artifacts/download_android_prod
 
       # ${{ steps.download_wear_prod.outputs.download-path }}
       - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
         id: download_wear_prod
         with:
-          name: ${{ needs.build_wear_flavor_prod.outputs.ARTIFACTS_NAME }}
+          name: ${{ needs.assemble_wearos.outputs.ARTIFACTS_NAME }}
           path: artifacts/download_wear_prod
 
       - name: Prepare mapping

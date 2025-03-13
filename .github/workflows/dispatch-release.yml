@@ -5,12 +5,12 @@ on:
     inputs:
       FLAVOR_TYPE:
         type: choice
-        options: [ "PROD","DEV" ]
+        options: [ "PROD", "DEV" ]
         description: "Type of flavor"
         required: true
       TRACK:
         type: choice
-        options: [ "production","test" ]
+        options: [ "production", "test" ]
         description: "GooglePlay distribution track"
         required: true
 
