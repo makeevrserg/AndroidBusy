@@ -66,6 +66,7 @@ jobs:
         id: mappings
         run: |
           mkdir mappings
+          echo "$(ls ${{ steps.download_android_dev.outputs.download-path }})"
           mv "${{ steps.download_android_dev.outputs.download-path }}/mapping-android.txt" mappings/
           zip -qq -r mappings.zip mappings
           echo "archive=mappings.zip" >> $GITHUB_OUTPUT
