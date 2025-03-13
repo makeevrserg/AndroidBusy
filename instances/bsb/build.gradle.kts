@@ -72,6 +72,7 @@ kotlin {
 
             implementation(projects.components.core.activityholder)
             implementation(libs.appcompat)
+            implementation(libs.androidx.splashscreen)
 
             implementation(projects.components.bsb.wear.bridge.common)
             implementation(projects.components.bsb.wear.bridge.android)
