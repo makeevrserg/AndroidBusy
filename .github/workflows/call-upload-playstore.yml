@@ -1,4 +1,4 @@
-name: Assemble android-based modules
+name: Upload to GooglePlay
 on:
   workflow_call:
     secrets:

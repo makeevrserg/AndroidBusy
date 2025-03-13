@@ -1,4 +1,4 @@
-name: Assemble android-based modules
+name: Assemble android-based module
 on:
   workflow_call:
     secrets:
