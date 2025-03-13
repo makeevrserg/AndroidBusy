@@ -29,6 +29,7 @@ jobs:
       DIR_PATH: "instances/bsb-test"
       IDENTIFIER: "android"
       FLAVOR_TYPE: "DEV"
+      IS_STUB: true
 
   # ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
   #build_desktop:
