@@ -1,0 +1,93 @@
+name: Create build number
+on:
+  workflow_call:
+    outputs:
+      ARTIFACTS_OUTPUT_PATH:
+        description: "Uploaded artifacts path"
+        value: ${{ jobs.build_upload_artifacts.outputs.ARTIFACTS_OUTPUT_PATH }}
+    inputs:
+        BUILD_NUMBER:
+          required: true
+          type: string
+        # :instances:app
+        # :instances:wear 
+        MODULE_PATH:
+            required: true
+            type: string
+        # instances/bsb/build/outputs/apk/release
+        BUILT_APK_PATH:
+          required: true
+          type: string
+        # instances/bsb/build/outputs/bundle/release
+        BUILT_AAB_PATH:
+            required: true
+            type: string
+        # android-dev
+        # wearos-dev
+        IDENTIFIER:
+          required: true
+          type: string
+        FLAVOR_TYPE:
+            required: true
+            type: string
+          
+
+jobs:
+  build_upload_artifacts:
+    name: Build AAB and APK
+    runs-on: ubuntu-latest
+    env:
+        ORG_GRADLE_PROJECT_current_flavor_type: ${{ inputs.FLAVOR_TYPE }}
+    outputs:
+        ARTIFACTS_OUTPUT_PATH: ${{ steps.artifacts_copy.outputs.path }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          submodules: 'recursive'
+      - name: Set up JDK 1.17
+        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Build release
+        env:
+          ORG_GRADLE_PROJECT_version_code: ${{ inputs.BUILD_NUMBER }}
+        run: ./gradlew ${{ inputs.MODULE_PATH }}:assembleRelease ${{ inputs.MODULE_PATH }}:bundleRelease
+      # ${{ steps.sign_aab.outputs.signedReleaseFile }}
+      - name: Sign AAB
+        id: sign_aab
+        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
+        with:
+          releaseDirectory: ${{ inputs.BUILT_AAB_PATH }}
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+      # ${{ steps.sign_apk.outputs.signedReleaseFile }}
+      - name: Sign APK
+        id: sign_apk
+        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
+        with:
+          releaseDirectory: ${{ inputs.BUILT_APK_PATH }}
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+      # ${{ steps.artifacts_copy.outputs.path }}
+      - name: Copy artifacts
+        id: artifacts_copy
+        run: |
+          mkdir artifacts
+          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}.aab
+          cp ${{ steps.sign_apk.outputs.signedReleaseFile }} artifacts/busystatusbar-${{ inputs.IDENTIFIER }}.apk
+          cp instances/bsb/build/outputs/mapping/release/mapping.txt artifacts/mapping-${{ inputs.IDENTIFIER }}.txt
+          echo "path=artifacts/" >> $GITHUB_OUTPUT
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
+        with:
+          name: artifacts
+          path: ${{ steps.artifacts_copy.outputs.path }}

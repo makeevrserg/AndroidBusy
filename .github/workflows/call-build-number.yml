@@ -1,0 +1,27 @@
+
+name: Create build number
+on:
+  workflow_call:
+    outputs:
+      BUILD_NUMBER:
+        description: "Auto-incremented build number"
+        value: ${{ jobs.build_number.outputs.BUILD_NUMBER }}
+
+jobs:
+  # ${{ jobs.build_number.outputs.BUILD_NUMBER }}
+  build_number:
+    name: Generate build number
+    runs-on: ubuntu-latest
+    outputs:
+      BUILD_NUMBER: ${{ steps.buildnumber.outputs.build_number }}
+    steps:
+      # ${{ steps.buildnumber.outputs.build_number }}
+      - name: Generate build number
+        id: buildnumber
+        uses: onyxmueller/build-tag-number@4a0c81c9af350d967032d49204c83c38e6b0c8e4 # v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Print build number'
+        id: buildnumber_print
+        run: |
+          echo "BUILD_NUMBER=${{ steps.buildnumber.outputs.build_number }}"
