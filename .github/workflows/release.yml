@@ -61,7 +61,7 @@ jobs:
         id: download_android_dev
         with:
           name: ${{ needs.build_android_flavor_dev.outputs.ARTIFACTS_NAME }}
-          path: ${{ steps.download.outputs.download-path }}
+          path: artifacts/download_android_dev
       - name: Prepare mapping
         id: mappings
         run: |
