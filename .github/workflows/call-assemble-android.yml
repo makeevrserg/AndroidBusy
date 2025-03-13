@@ -60,41 +60,49 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Build release
-        env:
-          ORG_GRADLE_PROJECT_version_code: ${{ inputs.BUILD_NUMBER }}
-        run: ./gradlew ${{ inputs.MODULE_PATH }}:assembleRelease ${{ inputs.MODULE_PATH }}:bundleRelease
-      # ${{ steps.sign_aab.outputs.signedReleaseFile }}
-      - name: Sign AAB
-        id: sign_aab
-        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
-        with:
-          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/bundle/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
-      # ${{ GP_TRACKGP_TRACKsign_apk.outputs.signedReleaseFile }}
-      - name: Sign APK
-        id: sign_apk
-        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
-        with:
-          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
-      # ${{ steps.artifacts_copy.outputs.path }}
+#      - name: Build release
+#        env:
+#          ORG_GRADLE_PROJECT_version_code: ${{ inputs.BUILD_NUMBER }}
+#        run: ./gradlew ${{ inputs.MODULE_PATH }}:assembleRelease ${{ inputs.MODULE_PATH }}:bundleRelease
+#      # ${{ steps.sign_aab.outputs.signedReleaseFile }}
+#      - name: Sign AAB
+#        id: sign_aab
+#        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
+#        with:
+#          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/bundle/release
+#          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+#          alias: ${{ secrets.KEY_ALIAS }}
+#          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+#          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
+#        env:
+#          BUILD_TOOLS_VERSION: "34.0.0"
+#      # ${{ GP_TRACKGP_TRACKsign_apk.outputs.signedReleaseFile }}
+#      - name: Sign APK
+#        id: sign_apk
+#        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
+#        with:
+#          releaseDirectory: ${{ inputs.DIR_PATH }}/build/outputs/apk/release
+#          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+#          alias: ${{ secrets.KEY_ALIAS }}
+#          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+#          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
+#        env:
+#          BUILD_TOOLS_VERSION: "34.0.0"
+#      # ${{ steps.artifacts_copy.outputs.path }}
+#      - name: Copy artifacts
+#        run: |
+#          mkdir ${{ env.ARTIFACTS_FOLDER_PATH }}
+#          cp ${{ steps.sign_apk.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.aab
+#          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.apk
+#          cp ${{ inputs.DIR_PATH }}/build/outputs/mapping/release/mapping.txt ${{ env.ARTIFACTS_FOLDER_PATH }}/mapping-${{ inputs.IDENTIFIER }}.txt
+
+
       - name: Copy artifacts
         run: |
           mkdir ${{ env.ARTIFACTS_FOLDER_PATH }}
-          cp ${{ steps.sign_apk.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.aab
-          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} ${{ env.ARTIFACTS_FOLDER_PATH }}/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.apk
-          cp ${{ inputs.DIR_PATH }}/build/outputs/mapping/release/mapping.txt ${{ env.ARTIFACTS_FOLDER_PATH }}/mapping-${{ inputs.IDENTIFIER }}.txt
+          echo "${{ env.ARTIFACTS_FOLDER_PATH }}/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.aab" >> ${{ env.ARTIFACTS_FOLDER_PATH }}/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.aab
+          echo "${{ env.ARTIFACTS_FOLDER_PATH }}/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.apk" >> ${{ env.ARTIFACTS_FOLDER_PATH }}/busystatusbar-${{ inputs.IDENTIFIER }}-${{ inputs.MAJOR_VERSION }}.${{ inputs.BUILD_NUMBER }}.apk
+          echo "${{ env.ARTIFACTS_FOLDER_PATH }}/mapping-${{ inputs.IDENTIFIER }}.txt" >> ${{ env.ARTIFACTS_FOLDER_PATH }}/mapping-${{ inputs.IDENTIFIER }}.txt
       - name: Upload Artifacts
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
         with:

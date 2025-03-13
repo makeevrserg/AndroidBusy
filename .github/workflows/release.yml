@@ -64,12 +64,12 @@ jobs:
       FLAVOR_TYPE: ${{ needs.env.outputs.FLAVOR_TYPE }}
 
   # ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
-  build_desktop:
-    name: "Build desktop app"
-    needs: [ env, build_number ]
-    uses: ./.github/workflows/call-desktop-build.yml
-    with:
-      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
+#  build_desktop:
+#    name: "Build desktop app"
+#    needs: [ env, build_number ]
+#    uses: ./.github/workflows/call-desktop-build.yml
+#    with:
+#      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
 
   upload_playstore_android:
     name: "Upload PlayStore Android-${{ needs.env.outputs.FLAVOR_TYPE }}"
@@ -98,7 +98,7 @@ jobs:
   upload_to_github:
     name: Upload to Github Releases
     runs-on: ubuntu-latest
-    needs: [ env, assemble_android, assemble_wearos, build_desktop, build_number ]
+    needs: [ env, assemble_android, assemble_wearos, build_number ]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -106,11 +106,11 @@ jobs:
       - name: Install zip
         uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
 
-      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
-        id: download_desktop
-        with:
-          name: ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
-          path: download/artifacts-desktop
+#      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+#        id: download_desktop
+#        with:
+#          name: ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
+#          path: download/artifacts-desktop
 
       # ${{ steps.download_android_prod.outputs.download-path }}
       - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
@@ -153,7 +153,7 @@ jobs:
             ${{ steps.other.outputs.archive }}
             ${{ steps.download_android_prod.outputs.download-path }}/*.apk
             ${{ steps.download_wear_prod.outputs.download-path }}/*.apk
-            ${{steps.download_desktop.outputs.download-path}}/*
+#            ${{steps.download_desktop.outputs.download-path}}/*
           tag_name: ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
           name: Busy App ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
           draft: false
