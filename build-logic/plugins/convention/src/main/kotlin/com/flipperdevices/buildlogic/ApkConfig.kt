@@ -1,6 +1,7 @@
 package com.flipperdevices.buildlogic
 
 import com.flipperdevices.buildlogic.model.FlavorType
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 
 object ApkConfig {
@@ -15,8 +16,11 @@ object ApkConfig {
 
     val Project.VERSION_CODE
         get() = prop("version_code", 1).toInt()
+
     val Project.VERSION_NAME
-        get() = prop("version_name", "1.0.$VERSION_CODE")
+        get() = requireProperty("flipper.major_version")
+            .plus(".")
+            .plus(VERSION_CODE)
 
     val Project.COUNTLY_URL
         get() = prop("countly_url", "")
@@ -48,3 +52,10 @@ internal fun Project.propOrNull(key: String): String? {
 internal fun Project.prop(key: String, default: Any): String {
     return providers.gradleProperty(key).getOrElse(default.toString())
 }
+
+internal fun Project.requireProperty(key: String): String {
+    return providers.gradleProperty(key)
+        .orNull
+        ?: throw GradleException("Could not find required property $key")
+}
+

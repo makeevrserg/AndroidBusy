@@ -6,132 +6,148 @@ on:
       - 'main'
 
 jobs:
-  build_number:
-    name: Generate build number
+  # Root-Level env doesn't work https://github.com/actions/runner/issues/2372
+  # ${{ needs.env.outputs.FLAVOR_TYPE }}
+  # ${{ needs.env.outputs.GP_TRACK }}
+  env:
     runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "FLAVOR_TYPE=PROD" >> $GITHUB_OUTPUT
+          echo "GP_TRACK=internal" >> $GITHUB_OUTPUT
+        id: set_env
     outputs:
-      number: ${{ steps.build_out.outputs.number }}
-      number_wearos: ${{ steps.wearos_out.outputs.number_wearos }}
-    steps:
-      - name: Generate build number
-        id: buildnumber
-        uses: onyxmueller/build-tag-number@4a0c81c9af350d967032d49204c83c38e6b0c8e4 # v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: 'Set output for simple build'
-        id: build_out
-        run: |
-          echo "number=${{ steps.buildnumber.outputs.build_number }}" >> $GITHUB_OUTPUT
-  build_release:
-    name: Build AAB and APK
-    runs-on: ubuntu-latest
-    needs: [ build_number ]
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          submodules: 'recursive'
-      - name: Set up JDK 1.17
-        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      - name: Build release
-        env:
-          ORG_GRADLE_PROJECT_version_code: ${{ needs.build_number.outputs.number }}
-        run: ./gradlew assembleRelease bundleRelease
-      - name: Sign AAB
-        id: sign_aab
-        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
-        with:
-          releaseDirectory: instances/bsb/build/outputs/bundle/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
-      - name: Sign APK
-        id: sign_apk
-        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
-        with:
-          releaseDirectory: instances/bsb/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_ALIAS_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
-      - name: Copy artifacts
-        id: artifacts_copy
-        run: |
-          mkdir artifacts
-          cp ${{ steps.sign_aab.outputs.signedReleaseFile }} artifacts/busystatusbar.aab
-          cp ${{ steps.sign_apk.outputs.signedReleaseFile }} artifacts/busystatusbar.apk
-          cp instances/bsb/build/outputs/mapping/release/mapping.txt artifacts/mapping.txt
-          echo "path=artifacts/" >> $GITHUB_OUTPUT
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
-        with:
-          name: artifacts
-          path: ${{ steps.artifacts_copy.outputs.path }}
+      FLAVOR_TYPE: ${{ steps.set_env.outputs.FLAVOR_TYPE }}
+      GP_TRACK: ${{ steps.set_env.outputs.GP_TRACK }}
+
+  # ${{ needs.build_number.outputs.BUILD_NUMBER }}
+  build_number:
+    name: "Create build number"
+    uses: ./.github/workflows/call-build-number.yml
+
+  # ${{ needs.assemble_android.outputs.ARTIFACTS_OUTPUT_PATH }}
+  # ${{ needs.assemble_android.outputs.ARTIFACTS_NAME }}
+  assemble_android:
+    name: "Assemble Android-${{ needs.env.outputs.FLAVOR_TYPE }}"
+    needs: [ env, build_number ]
+    uses: ./.github/workflows/call-assemble-android.yml
+    secrets:
+      SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+      KEY_ALIAS_PASSWORD: ${{ secrets.KEY_ALIAS_PASSWORD }}
+    with:
+      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
+      MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
+      MODULE_PATH: ":instances:bsb"
+      DIR_PATH: "instances/bsb"
+      IDENTIFIER: "android"
+      FLAVOR_TYPE: ${{ needs.env.outputs.FLAVOR_TYPE }}
+
+  # ${{ needs.assemble_wearos.outputs.ARTIFACTS_OUTPUT_PATH }}
+  # ${{ needs.assemble_wearos.outputs.ARTIFACTS_NAME }}
+  assemble_wearos:
+    name: "Assemble WearOS-${{ needs.env.outputs.FLAVOR_TYPE }}"
+    needs: [ env, build_number ]
+    uses: ./.github/workflows/call-assemble-android.yml
+    secrets:
+      SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+      KEY_ALIAS_PASSWORD: ${{ secrets.KEY_ALIAS_PASSWORD }}
+    with:
+      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
+      MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
+      MODULE_PATH: ":instances:bsb-wear"
+      DIR_PATH: "instances/bsb-wear"
+      IDENTIFIER: "wear"
+      FLAVOR_TYPE: ${{ needs.env.outputs.FLAVOR_TYPE }}
+
+  # ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
   build_desktop:
     name: "Build desktop app"
-    needs: [ build_number ]
+    needs: [ env, build_number ]
     uses: ./.github/workflows/call-desktop-build.yml
     with:
-      BUILD_NUMBER: ${{ needs.build_number.outputs.number }}
+      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
+
+  upload_playstore_android:
+    name: "Upload PlayStore Android-${{ needs.env.outputs.FLAVOR_TYPE }}"
+    needs: [ env, build_number, assemble_android ]
+    uses: ./.github/workflows/call-upload-playstore.yml
+    secrets:
+      GOOGLE_PLAY_PUBLISHER_JSON: ${{ secrets.GOOGLE_PLAY_PUBLISHER_JSON }}
+    with:
+      ARTIFACT_NAME: ${{ needs.assemble_android.outputs.ARTIFACTS_NAME }}
+      IDENTIFIER: "android-${{ needs.env.outputs.FLAVOR_TYPE }}"
+      FLAVOR_TYPE: ${{ needs.env.outputs.FLAVOR_TYPE }}
+      TRACK: ${{ needs.env.outputs.GP_TRACK }}
+      AAB_FILE: ${{ needs.assemble_android.outputs.AAB_FILE }}
+      MAPPING_FILE: ${{ needs.assemble_android.outputs.MAPPING_FILE }}
+
+  upload_playstore_wear:
+    name: "Upload PlayStore WearOS-${{ needs.env.outputs.FLAVOR_TYPE }}"
+    needs: [ env, build_number, assemble_wearos ]
+    uses: ./.github/workflows/call-upload-playstore.yml
+    secrets:
+      GOOGLE_PLAY_PUBLISHER_JSON: ${{ secrets.GOOGLE_PLAY_PUBLISHER_JSON }}
+    with:
+      ARTIFACT_NAME: ${{ needs.assemble_wearos.outputs.ARTIFACTS_NAME }}
+      IDENTIFIER: "android-${{ needs.env.outputs.FLAVOR_TYPE }}"
+      FLAVOR_TYPE: ${{ needs.env.outputs.FLAVOR_TYPE }}
+      TRACK: ${{ needs.env.outputs.GP_TRACK }}
+      AAB_FILE: ${{ needs.assemble_wearos.outputs.AAB_FILE }}
+      MAPPING_FILE: ${{ needs.assemble_wearos.outputs.MAPPING_FILE }}
+
   upload_to_github:
     name: Upload to Github Releases
     runs-on: ubuntu-latest
-    needs: [ build_release, build_number, build_desktop ]
+    needs: [ env, assemble_android, assemble_wearos, build_number, build_desktop ]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           submodules: 'recursive'
-      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
-        id: download
-        with:
-          name: artifacts
-          path: download/artifacts
-      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
-        id: download-desktop
-        with:
-          name: ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
-          path: download/artifacts-desktop
-      - name: 'Copy artifacts'
-        id: artifacts_copy
-        run: |
-          mkdir artifacts
-          cp ${{steps.download.outputs.download-path}}/* artifacts/
-          echo "path=artifacts/" >> $GITHUB_OUTPUT
       - name: Install zip
         uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
+
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+        id: download_desktop
+        with:
+          name: ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
+          path: artifacts/download_desktop
+
+      # ${{ steps.download_android.outputs.download-path }}
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+        id: download_android
+        with:
+          name: ${{ needs.assemble_android.outputs.ARTIFACTS_NAME }}
+          path: artifacts/download_android
+
+      # ${{ steps.download_wear.outputs.download-path }}
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+        id: download_wear
+        with:
+          name: ${{ needs.assemble_wearos.outputs.ARTIFACTS_NAME }}
+          path: artifacts/download_wear
+
       - name: Prepare mapping
         id: mappings
         run: |
           mkdir mappings
-          mv "${{ steps.artifacts_copy.outputs.path }}/mapping.txt" mappings/
+          mv "${{ steps.download_android.outputs.download-path }}/${{ needs.assemble_android.outputs.MAPPING_FILE }}" mappings/
+          mv "${{ steps.download_wear.outputs.download-path }}/${{ needs.assemble_wearos.outputs.MAPPING_FILE }}" mappings/
           zip -qq -r mappings.zip mappings
           echo "archive=mappings.zip" >> $GITHUB_OUTPUT
       - name: Prepare other builds
         id: other
         run: |
           mkdir other
-          mv ${{ steps.artifacts_copy.outputs.path }}/*.aab other/
+          mv ${{ steps.download_android.outputs.download-path }}/${{ needs.assemble_android.outputs.AAB_NAME }} other/
+          mv ${{ steps.download_wear.outputs.download-path }}/${{ needs.assemble_wearos.outputs.AAB_NAME }} other/
           zip -qq -r other.zip other
           echo "archive=other.zip" >> $GITHUB_OUTPUT
-      - name: 'Set variables'
-        id: vars
-        run: |
-          export $(cat .github/workflows/version.env | xargs)
-          echo "major_version=1.0" >> $GITHUB_OUTPUT
-          echo "minor_version=${{ needs.build_number.outputs.number }}" >> $GITHUB_OUTPUT
-      - name: Artifact build beautifier
-        id: beautifier
-        run: |
-          mv ${{ steps.artifacts_copy.outputs.path }}/busystatusbar.apk ${{ steps.artifacts_copy.outputs.path }}/busystatusbar-${{ steps.vars.outputs.major_version }}.${{ steps.vars.outputs.minor_version }}.apk
-      - name: Create internal Release
-        id: create_internal_release
+      - name: Create Release
+        id: create_release
         uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -139,10 +155,11 @@ jobs:
           files: |
             ${{ steps.mappings.outputs.archive }}
             ${{ steps.other.outputs.archive }}
-            ${{ steps.artifacts_copy.outputs.path }}/busystatusbar-${{ steps.vars.outputs.major_version }}.${{ steps.vars.outputs.minor_version }}.apk
-            ${{steps.download-desktop.outputs.download-path}}/*
-          tag_name: ${{ steps.vars.outputs.major_version }}.${{ steps.vars.outputs.minor_version }}
-          name: Busy App ${{ steps.vars.outputs.major_version }}.${{ steps.vars.outputs.minor_version }}
+            ${{ steps.download_android.outputs.download-path }}/${{ needs.assemble_android.outputs.APK_NAME }}
+            ${{ steps.download_wear.outputs.download-path }}/${{ needs.assemble_wearos.outputs.APK_NAME }}
+            ${{steps.download_desktop.outputs.download-path}}/*
+          tag_name: ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
+          name: Busy App ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
           draft: false
           body: |
             Web version: [https://busy-app.github.io/Android/](https://busy-app.github.io/Android/)

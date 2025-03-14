@@ -1,0 +1,51 @@
+name: Upload to GooglePlay
+on:
+  workflow_call:
+    secrets:
+      GOOGLE_PLAY_PUBLISHER_JSON:
+        required: true
+    inputs:
+      AAB_FILE:
+        required: true
+        type: string
+      MAPPING_FILE:
+        required: true
+        type: string
+      ARTIFACT_NAME:
+        required: true
+        type: string
+      # android-dev
+      # wearos-dev
+      IDENTIFIER:
+        required: true
+        type: string
+      FLAVOR_TYPE:
+        required: true
+        type: string
+      TRACK:
+        required: true
+        type: string
+
+env:
+  ARTIFACTS_FOLDER_PATH: artifacts
+
+jobs:
+  upload_to_playstore:
+    name: Upload to Play Store
+    runs-on: ubuntu-latest
+    steps:
+      # ${{ steps.download_artifact.outputs.download-path }}
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+        id: download_artifact
+        with:
+          name: ${{ inputs.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACTS_FOLDER_PATH }}
+
+      - name: Upload to Play Store ${{ inputs.FLAVOR_TYPE }}-${{ inputs.IDENTIFIER }}
+        uses: r0adkll/upload-google-play@935ef9c68bb393a8e6116b1575626a7f5be3a7fb # v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_PUBLISHER_JSON }}
+          packageName: com.flipperdevices.bsb
+          releaseFiles: ${{ steps.download_artifact.outputs.download-path }}/${{ inputs.AAB_FILE }}
+          track: ${{ inputs.TRACK }}
+          mappingFile: ${{ steps.download_artifact.outputs.download-path }}/${{ inputs.MAPPING_FILE }}
