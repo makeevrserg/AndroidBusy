@@ -41,6 +41,15 @@ jobs:
           name: ${{ inputs.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACTS_FOLDER_PATH }}
 
+      - name: Print
+        run: |
+          mkdir ${{ env.ARTIFACTS_FOLDER_PATH }}
+        
+          echo ARTIFACTS_FOLDER_PATH=${{ env.ARTIFACTS_FOLDER_PATH }}
+          echo TRACK=${{ inputs.TRACK }}
+          echo FILE=${{ steps.download_artifact.outputs.download-path }}/${{ inputs.AAB_FILE }}
+          echo $(ls ${{ steps.download_artifact.outputs.download-path }})
+
       - name: Upload to Play Store ${{ inputs.FLAVOR_TYPE }}-${{ inputs.IDENTIFIER }}
         uses: r0adkll/upload-google-play@935ef9c68bb393a8e6116b1575626a7f5be3a7fb # v1.1.3
         with:
