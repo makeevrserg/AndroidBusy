@@ -28,7 +28,7 @@ enum class FlavorType(
         isLogEnabled = true,
         crashAppOnFailedChecks = false,
         isSentryEnabled = true,
-        isSentryPublishMappingsEnabled = false,
+        isSentryPublishMappingsEnabled = true,
         isSensitiveLogEnabled = false,
         isGoogleFeatureAvaliable = true
     ),
@@ -36,7 +36,7 @@ enum class FlavorType(
         isLogEnabled = true,
         crashAppOnFailedChecks = false,
         isSentryEnabled = true,
-        isSentryPublishMappingsEnabled = false,
+        isSentryPublishMappingsEnabled = true,
         isSensitiveLogEnabled = false,
         isGoogleFeatureAvaliable = false
     )
