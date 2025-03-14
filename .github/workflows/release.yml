@@ -20,16 +20,21 @@ jobs:
       FLAVOR_TYPE: ${{ steps.set_env.outputs.FLAVOR_TYPE }}
       GP_TRACK: ${{ steps.set_env.outputs.GP_TRACK }}
 
-  # ${{ needs.build_number.outputs.BUILD_NUMBER }}
-  build_number:
-    name: "Create build number"
+  # ${{ needs.build_number_wear.outputs.BUILD_NUMBER }}
+  build_number_wear:
+    name: "Create build number for Wear"
+    uses: ./.github/workflows/call-build-number.yml
+
+  # ${{ needs.build_number_common.outputs.BUILD_NUMBER }}
+  build_number_common:
+    name: "Create build number for Android"
     uses: ./.github/workflows/call-build-number.yml
 
   # ${{ needs.assemble_android.outputs.ARTIFACTS_OUTPUT_PATH }}
   # ${{ needs.assemble_android.outputs.ARTIFACTS_NAME }}
   assemble_android:
     name: "Assemble Android-${{ needs.env.outputs.FLAVOR_TYPE }}"
-    needs: [ env, build_number ]
+    needs: [ env, build_number_common ]
     uses: ./.github/workflows/call-assemble-android.yml
     secrets:
       SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
@@ -38,8 +43,8 @@ jobs:
       KEY_ALIAS_PASSWORD: ${{ secrets.KEY_ALIAS_PASSWORD }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
     with:
-      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
-      MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
+      BUILD_NUMBER: ${{ needs.build_number_common.outputs.BUILD_NUMBER }}
+      MAJOR_VERSION: ${{ needs.build_number_common.outputs.MAJOR_VERSION }}
       MODULE_PATH: ":instances:bsb"
       DIR_PATH: "instances/bsb"
       IDENTIFIER: "android"
@@ -49,7 +54,7 @@ jobs:
   # ${{ needs.assemble_android_nogms.outputs.ARTIFACTS_NAME }}
   assemble_android_nogms:
     name: "Assemble Android-${{ needs.env.outputs.FLAVOR_TYPE }}"
-    needs: [ env, build_number ]
+    needs: [ env, build_number_common ]
     uses: ./.github/workflows/call-assemble-android.yml
     secrets:
       SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
@@ -58,18 +63,18 @@ jobs:
       KEY_ALIAS_PASSWORD: ${{ secrets.KEY_ALIAS_PASSWORD }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
     with:
-      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
-      MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
+      BUILD_NUMBER: ${{ needs.build_number_common.outputs.BUILD_NUMBER }}
+      MAJOR_VERSION: ${{ needs.build_number_common.outputs.MAJOR_VERSION }}
       MODULE_PATH: ":instances:bsb"
       DIR_PATH: "instances/bsb"
-      IDENTIFIER: "android"
+      IDENTIFIER: "android-nogms"
       FLAVOR_TYPE: PROD_NO_GMS
 
   # ${{ needs.assemble_wearos.outputs.ARTIFACTS_OUTPUT_PATH }}
   # ${{ needs.assemble_wearos.outputs.ARTIFACTS_NAME }}
   assemble_wearos:
     name: "Assemble WearOS-${{ needs.env.outputs.FLAVOR_TYPE }}"
-    needs: [ env, build_number ]
+    needs: [ env, build_number_wear ]
     uses: ./.github/workflows/call-assemble-android.yml
     secrets:
       SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
@@ -78,8 +83,8 @@ jobs:
       KEY_ALIAS_PASSWORD: ${{ secrets.KEY_ALIAS_PASSWORD }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
     with:
-      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
-      MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
+      BUILD_NUMBER: ${{ needs.build_number_wear.outputs.BUILD_NUMBER }}
+      MAJOR_VERSION: ${{ needs.build_number_wear.outputs.MAJOR_VERSION }}
       MODULE_PATH: ":instances:bsb-wear"
       DIR_PATH: "instances/bsb-wear"
       IDENTIFIER: "wear"
@@ -88,14 +93,14 @@ jobs:
   # ${{ needs.build_desktop.outputs.ARTIFACTS_NAME }}
   build_desktop:
     name: "Build desktop app"
-    needs: [ env, build_number ]
+    needs: [ env, build_number_common ]
     uses: ./.github/workflows/call-desktop-build.yml
     with:
-      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER }}
+      BUILD_NUMBER: ${{ needs.build_number_common.outputs.BUILD_NUMBER }}
 
   upload_playstore_android:
     name: "Upload PlayStore Android-${{ needs.env.outputs.FLAVOR_TYPE }}"
-    needs: [ env, build_number, assemble_android ]
+    needs: [ env, assemble_android ]
     uses: ./.github/workflows/call-upload-playstore.yml
     secrets:
       GOOGLE_PLAY_PUBLISHER_JSON: ${{ secrets.GOOGLE_PLAY_PUBLISHER_JSON }}
@@ -109,7 +114,7 @@ jobs:
 
   upload_playstore_wear:
     name: "Upload PlayStore WearOS-${{ needs.env.outputs.FLAVOR_TYPE }}"
-    needs: [ env, build_number, assemble_wearos ]
+    needs: [ env, assemble_wearos ]
     uses: ./.github/workflows/call-upload-playstore.yml
     secrets:
       GOOGLE_PLAY_PUBLISHER_JSON: ${{ secrets.GOOGLE_PLAY_PUBLISHER_JSON }}
@@ -124,7 +129,7 @@ jobs:
   upload_to_github:
     name: Upload to Github Releases
     runs-on: ubuntu-latest
-    needs: [ env, assemble_android, assemble_android_nogms, assemble_wearos, build_number, build_desktop ]
+    needs: [ env, assemble_android, assemble_android_nogms, assemble_wearos, build_number_common, build_desktop ]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -190,8 +195,8 @@ jobs:
             ${{ steps.download_android_nogms.outputs.download-path }}/${{ needs.assemble_android_nogms.outputs.APK_NAME }}
             ${{ steps.download_wear.outputs.download-path }}/${{ needs.assemble_wearos.outputs.APK_NAME }}
             ${{steps.download_desktop.outputs.download-path}}/*
-          tag_name: ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
-          name: Busy App ${{ needs.build_number.outputs.MAJOR_VERSION }}.${{ needs.build_number.outputs.BUILD_NUMBER }}
+          tag_name: ${{ needs.build_number_common.outputs.MAJOR_VERSION }}.${{ needs.build_number_common.outputs.BUILD_NUMBER }}
+          name: Busy App ${{ needs.build_number_common.outputs.MAJOR_VERSION }}.${{ needs.build_number_common.outputs.BUILD_NUMBER }}
           draft: false
           body: |
             Web version: [https://busy-app.github.io/Android/](https://busy-app.github.io/Android/)
