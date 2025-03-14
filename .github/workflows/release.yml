@@ -64,7 +64,7 @@ jobs:
       MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
       MODULE_PATH: ":instances:bsb"
       DIR_PATH: "instances/bsb"
-      IDENTIFIER: "android"
+      IDENTIFIER: "android-nogms"
       FLAVOR_TYPE: PROD_NO_GMS
 
   # ${{ needs.assemble_wearos.outputs.ARTIFACTS_OUTPUT_PATH }}
