@@ -14,7 +14,7 @@ jobs:
     steps:
       - run: |
           echo "FLAVOR_TYPE=PROD" >> $GITHUB_OUTPUT
-          echo "GP_TRACK=internal" >> $GITHUB_OUTPUT
+          echo "GP_TRACK=production" >> $GITHUB_OUTPUT
         id: set_env
     outputs:
       FLAVOR_TYPE: ${{ steps.set_env.outputs.FLAVOR_TYPE }}

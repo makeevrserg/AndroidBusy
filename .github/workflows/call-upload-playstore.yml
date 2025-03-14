@@ -43,8 +43,6 @@ jobs:
 
       - name: Print
         run: |
-          mkdir ${{ env.ARTIFACTS_FOLDER_PATH }}
-        
           echo ARTIFACTS_FOLDER_PATH=${{ env.ARTIFACTS_FOLDER_PATH }}
           echo TRACK=${{ inputs.TRACK }}
           echo FILE=${{ steps.download_artifact.outputs.download-path }}/${{ inputs.AAB_FILE }}
