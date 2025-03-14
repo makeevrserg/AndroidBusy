@@ -12,8 +12,6 @@ object ApkConfig {
     const val TARGET_SDK_VERSION = 35
     const val COMPILE_SDK_VERSION = 35
 
-    private const val DEBUG_VERSION = "DEBUG_VERSION"
-
     val Project.VERSION_CODE
         get() = prop("version_code", 1).toInt()
 
@@ -28,7 +26,7 @@ object ApkConfig {
             val key = "current_flavor_type"
             val propValue = propOrNull(key)
             if (propValue == null) {
-                logger.warn("Property $key was not found, writing default $default")
+                logger.error("Property $key was not found, writing default $default")
             }
             return FlavorType.values().find { it.name == propValue } ?: default
         }

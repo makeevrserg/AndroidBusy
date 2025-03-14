@@ -13,20 +13,31 @@ enum class FlavorType(
     val crashAppOnFailedChecks: Boolean,
     val isSentryEnabled: Boolean,
     val isSentryPublishMappingsEnabled: Boolean,
-    val isSensitiveLogEnabled: Boolean
+    val isSensitiveLogEnabled: Boolean,
+    val isGoogleFeatureAvaliable: Boolean
 ) {
     DEV(
         isLogEnabled = true,
         crashAppOnFailedChecks = true,
         isSentryEnabled = true,
         isSentryPublishMappingsEnabled = false,
-        isSensitiveLogEnabled = true
+        isSensitiveLogEnabled = true,
+        isGoogleFeatureAvaliable = true
     ),
     PROD(
         isLogEnabled = true,
         crashAppOnFailedChecks = false,
         isSentryEnabled = true,
         isSentryPublishMappingsEnabled = true,
-        isSensitiveLogEnabled = false
+        isSensitiveLogEnabled = false,
+        isGoogleFeatureAvaliable = true
+    ),
+    PROD_NO_GMS(
+        isLogEnabled = true,
+        crashAppOnFailedChecks = false,
+        isSentryEnabled = true,
+        isSentryPublishMappingsEnabled = true,
+        isSensitiveLogEnabled = false,
+        isGoogleFeatureAvaliable = false
     )
 }
