@@ -14,14 +14,6 @@ on:
       ARTIFACT_NAME:
         required: true
         type: string
-      # android-dev
-      # wearos-dev
-      IDENTIFIER:
-        required: true
-        type: string
-      FLAVOR_TYPE:
-        required: true
-        type: string
       TRACK:
         required: true
         type: string
@@ -41,7 +33,7 @@ jobs:
           name: ${{ inputs.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACTS_FOLDER_PATH }}
 
-      - name: Upload to Play Store ${{ inputs.FLAVOR_TYPE }}-${{ inputs.IDENTIFIER }}
+      - name: Upload to Play Store
         uses: r0adkll/upload-google-play@935ef9c68bb393a8e6116b1575626a7f5be3a7fb # v1.1.3
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_PUBLISHER_JSON }}

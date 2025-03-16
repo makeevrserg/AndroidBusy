@@ -24,7 +24,7 @@ enum class FlavorType(
         isSensitiveLogEnabled = true,
         isGoogleFeatureAvaliable = true
     ),
-    PROD(
+    PROD_GP( // For Google Play
         isLogEnabled = true,
         crashAppOnFailedChecks = false,
         isSentryEnabled = true,
@@ -32,7 +32,15 @@ enum class FlavorType(
         isSensitiveLogEnabled = false,
         isGoogleFeatureAvaliable = true
     ),
-    PROD_NO_GMS(
+    PROD_GH_GMS( // For GitHub, with google services
+        isLogEnabled = true,
+        crashAppOnFailedChecks = false,
+        isSentryEnabled = true,
+        isSentryPublishMappingsEnabled = true,
+        isSensitiveLogEnabled = false,
+        isGoogleFeatureAvaliable = true
+    ),
+    PROD_GH_NOGMS( // For GitHub, without google services
         isLogEnabled = true,
         crashAppOnFailedChecks = false,
         isSentryEnabled = true,
