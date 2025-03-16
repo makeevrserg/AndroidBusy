@@ -6,10 +6,29 @@ on:
       - 'main'
 
 jobs:
+  # Root-Level env doesn't work https://github.com/actions/runner/issues/2372
+  # ${{ needs.env.outputs.GP_TRACK }}
+  env:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "GP_TRACK=internal" >> $GITHUB_OUTPUT
+        id: set_env
+    outputs:
+      GP_TRACK: ${{ steps.set_env.outputs.GP_TRACK }}
+
+  # ${{ needs.build_number.outputs.BUILD_NUMBER }}
+  # ${{ needs.build_number.outputs.BUILD_NUMBER_WEAR }}
+  # ${{ needs.build_number.outputs.MAJOR_VERSION }}
+  build_number:
+    name: "Create build number"
+    uses: ./.github/workflows/call-build-number.yml
+
   # ${{ needs.assemble_wearos.outputs.ARTIFACTS_OUTPUT_PATH }}
   # ${{ needs.assemble_wearos.outputs.ARTIFACTS_NAME }}
   assemble_wearos:
     name: "Assemble WearOS"
+    needs: [ env, build_number ]
     uses: ./.github/workflows/call-assemble-android.yml
     secrets:
       SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
@@ -18,8 +37,8 @@ jobs:
       KEY_ALIAS_PASSWORD: ${{ secrets.KEY_ALIAS_PASSWORD }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
     with:
-      BUILD_NUMBER: 1
-      MAJOR_VERSION: 1.0
+      BUILD_NUMBER: ${{ needs.build_number.outputs.BUILD_NUMBER_WEAR }}
+      MAJOR_VERSION: ${{ needs.build_number.outputs.MAJOR_VERSION }}
       MODULE_PATH: ":instances:bsb-wear"
       DIR_PATH: "instances/bsb-wear"
       IDENTIFIER: "wear"
