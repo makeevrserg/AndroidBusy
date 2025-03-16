@@ -14,7 +14,7 @@ enum class FlavorType(
     val isSentryEnabled: Boolean,
     val isSentryPublishMappingsEnabled: Boolean,
     val isSensitiveLogEnabled: Boolean,
-    val isGoogleFeatureAvaliable: Boolean
+    val isGoogleFeatureAvailable: Boolean
 ) {
     DEV(
         isLogEnabled = true,
@@ -22,7 +22,7 @@ enum class FlavorType(
         isSentryEnabled = true,
         isSentryPublishMappingsEnabled = false,
         isSensitiveLogEnabled = true,
-        isGoogleFeatureAvaliable = true
+        isGoogleFeatureAvailable = true
     ),
     PROD_GP( // For Google Play
         isLogEnabled = true,
@@ -30,7 +30,7 @@ enum class FlavorType(
         isSentryEnabled = true,
         isSentryPublishMappingsEnabled = SENTRY_PUBLISH_ENABLED,
         isSensitiveLogEnabled = false,
-        isGoogleFeatureAvaliable = true
+        isGoogleFeatureAvailable = true
     ),
     PROD_GH_GMS( // For GitHub, with google services
         isLogEnabled = true,
@@ -38,7 +38,7 @@ enum class FlavorType(
         isSentryEnabled = true,
         isSentryPublishMappingsEnabled = SENTRY_PUBLISH_ENABLED,
         isSensitiveLogEnabled = false,
-        isGoogleFeatureAvaliable = true
+        isGoogleFeatureAvailable = true
     ),
     PROD_GH_NOGMS( // For GitHub, without google services
         isLogEnabled = true,
@@ -46,8 +46,8 @@ enum class FlavorType(
         isSentryEnabled = true,
         isSentryPublishMappingsEnabled = SENTRY_PUBLISH_ENABLED,
         isSensitiveLogEnabled = false,
-        isGoogleFeatureAvaliable = false
+        isGoogleFeatureAvailable = false
     )
 }
 
-const val SENTRY_PUBLISH_ENABLED = false // Disable sentry publishing if sentr.flipp.dev is down
+const val SENTRY_PUBLISH_ENABLED = false // Disable sentry publishing if sentry.flipp.dev is down

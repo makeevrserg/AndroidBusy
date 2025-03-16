@@ -2,7 +2,6 @@ import com.flipperdevices.buildlogic.ApkConfig
 import com.flipperdevices.buildlogic.ApkConfig.CURRENT_FLAVOR_TYPE
 import com.flipperdevices.buildlogic.ApkConfig.VERSION_NAME
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
@@ -16,7 +15,7 @@ plugins {
     id("flipper.multiplatform-dependencies")
 }
 
-if (CURRENT_FLAVOR_TYPE.isGoogleFeatureAvaliable) {
+if (CURRENT_FLAVOR_TYPE.isGoogleFeatureAvailable) {
     apply(plugin = libs.plugins.googleServices.get().pluginId)
 }
 
@@ -28,6 +27,8 @@ android {
 }
 
 kotlin {
+    androidTarget()
+
     wasmJs {
         moduleName = "bsb"
         browser {
@@ -43,13 +44,6 @@ kotlin {
             }
         }
         binaries.executable()
-    }
-
-    androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-//            jvmTarget.set(JvmTarget.JVM_11)
-        }
     }
 
     jvm("desktop")
@@ -85,7 +79,7 @@ kotlin {
             implementation(libs.androidx.splashscreen)
 
             implementation(projects.components.bsb.wear.bridge.syncservice.api)
-            if (CURRENT_FLAVOR_TYPE.isGoogleFeatureAvaliable) {
+            if (CURRENT_FLAVOR_TYPE.isGoogleFeatureAvailable) {
                 implementation(projects.components.bsb.wear.bridge.messenger.impl)
                 implementation(projects.components.bsb.wear.bridge.messenger.common)
                 implementation(projects.components.bsb.wear.bridge.syncservice.android)
@@ -247,7 +241,7 @@ commonDependencies {
 }
 
 dependencies {
-    if (CURRENT_FLAVOR_TYPE.isGoogleFeatureAvaliable) {
+    if (CURRENT_FLAVOR_TYPE.isGoogleFeatureAvailable) {
         implementation(platform(libs.firebase.bom))
     }
 

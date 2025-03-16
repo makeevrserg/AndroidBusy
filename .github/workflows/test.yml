@@ -1,0 +1,26 @@
+name: Build and publish
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  # ${{ needs.assemble_wearos.outputs.ARTIFACTS_OUTPUT_PATH }}
+  # ${{ needs.assemble_wearos.outputs.ARTIFACTS_NAME }}
+  assemble_wearos:
+    name: "Assemble WearOS"
+    uses: ./.github/workflows/call-assemble-android.yml
+    secrets:
+      SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+      KEY_ALIAS_PASSWORD: ${{ secrets.KEY_ALIAS_PASSWORD }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+    with:
+      BUILD_NUMBER: 1
+      MAJOR_VERSION: 1.0
+      MODULE_PATH: ":instances:bsb-wear"
+      DIR_PATH: "instances/bsb-wear"
+      IDENTIFIER: "wear"
+      FLAVOR_TYPE: PROD_GP
