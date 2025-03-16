@@ -47,4 +47,5 @@ jobs:
         id: buildnumber_print
         run: |
           echo "BUILD_NUMBER=${{ steps.buildnumber.outputs.build_number }}"
+          echo "BUILD_NUMBER_WEAR=${{ steps.buildnumber.outputs.buildnumber_wear }}"
           echo "MAJOR_VERSION=${{ steps.properties.outputs.flipper-major_version }}"
