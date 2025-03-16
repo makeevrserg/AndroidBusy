@@ -28,7 +28,7 @@ enum class FlavorType(
         isLogEnabled = true,
         crashAppOnFailedChecks = false,
         isSentryEnabled = true,
-        isSentryPublishMappingsEnabled = true,
+        isSentryPublishMappingsEnabled = SENTRY_PUBLISH_ENABLED,
         isSensitiveLogEnabled = false,
         isGoogleFeatureAvaliable = true
     ),
@@ -36,7 +36,7 @@ enum class FlavorType(
         isLogEnabled = true,
         crashAppOnFailedChecks = false,
         isSentryEnabled = true,
-        isSentryPublishMappingsEnabled = true,
+        isSentryPublishMappingsEnabled = SENTRY_PUBLISH_ENABLED,
         isSensitiveLogEnabled = false,
         isGoogleFeatureAvaliable = true
     ),
@@ -44,8 +44,10 @@ enum class FlavorType(
         isLogEnabled = true,
         crashAppOnFailedChecks = false,
         isSentryEnabled = true,
-        isSentryPublishMappingsEnabled = true,
+        isSentryPublishMappingsEnabled = SENTRY_PUBLISH_ENABLED,
         isSensitiveLogEnabled = false,
         isGoogleFeatureAvaliable = false
     )
 }
+
+const val SENTRY_PUBLISH_ENABLED = false // Disable sentry publishing if sentr.flipp.dev is down
