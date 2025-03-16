@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       BUILD_NUMBER: ${{ steps.buildnumber.outputs.build_number }}
-      BUILD_NUMBER_WEAR: ${{ steps.buildnumber.outputs.buildnumber_wear }}
+      BUILD_NUMBER_WEAR: ${{ steps.buildnumber_wear.outputs.build_number }}
       MAJOR_VERSION: ${{ steps.properties.outputs.flipper-major_version }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -47,5 +47,5 @@ jobs:
         id: buildnumber_print
         run: |
           echo "BUILD_NUMBER=${{ steps.buildnumber.outputs.build_number }}"
-          echo "BUILD_NUMBER_WEAR=${{ steps.buildnumber.outputs.buildnumber_wear }}"
+          echo "BUILD_NUMBER_WEAR=${{ steps.buildnumber_wear.outputs.build_number }}"
           echo "MAJOR_VERSION=${{ steps.properties.outputs.flipper-major_version }}"
